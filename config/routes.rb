@@ -1,4 +1,22 @@
 Rails.application.routes.draw do
+  # Authentication routes
+  get "/signin", to: "sessions#new", as: :signin
+  post "/signin", to: "sessions#create"
+  delete "/signout", to: "sessions#destroy", as: :signout
+
+  get "/signup", to: "registrations#new", as: :signup
+  post "/signup", to: "registrations#create"
+
+  # Password reset routes
+  resources :passwords, param: :token
+
+  # OAuth routes
+  get "/auth/:provider/callback" => "sessions/omni_auths#create", as: :omniauth_callback
+  get "/auth/failure" => "sessions/omni_auths#failure", as: :omniauth_failure
+
+  # Legacy routes for compatibility
+  resource :session
+  get "/login", to: "sessions#new"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -10,5 +28,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "home#index"
 end

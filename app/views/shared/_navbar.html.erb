@@ -1,0 +1,80 @@
+<nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo/Brand -->
+      <div class="flex items-center">
+        <%= link_to root_path, class: "flex items-center space-x-2" do %>
+          <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span class="text-white font-bold text-sm">S</span>
+          </div>
+          <span class="text-xl font-semibold text-gray-900">SaaS Starter</span>
+        <% end %>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center space-x-8">
+        <% if authenticated? %>
+          <!-- Authenticated Navigation -->
+          <%= link_to "Dashboard", root_path, class: "text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors" %>
+          <div class="relative" data-controller="dropdown">
+            <button type="button" data-action="click->dropdown#toggle" class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors">
+              <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span class="text-xs font-medium text-gray-700"><%= Current.user.email_address.first.upcase %></span>
+              </div>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </button>
+            <!-- Dropdown Menu -->
+            <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+              <div class="px-4 py-2 border-b border-gray-100">
+                <p class="text-sm text-gray-500">Signed in as</p>
+                <p class="text-sm font-medium text-gray-900 truncate"><%= Current.user.email_address %></p>
+              </div>
+              <%= link_to "Settings", "#", class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" %>
+              <%= button_to "Sign out", signout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors border-0 bg-transparent" %>
+            </div>
+          </div>
+        <% else %>
+          <!-- Unauthenticated Navigation -->
+          <%= link_to "Features", "#features", class: "text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors" %>
+          <%= link_to "Pricing", "#pricing", class: "text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors" %>
+          <div class="flex items-center space-x-4">
+            <%= link_to "Sign in", signin_path, class: "text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors" %>
+            <%= link_to "Get Started", signup_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Mobile menu button -->
+      <div class="md:hidden">
+        <button type="button" data-controller="mobile-menu" data-action="click->mobile-menu#toggle" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path data-mobile-menu-target="openIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            <path data-mobile-menu-target="closeIcon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div data-mobile-menu-target="menu" class="hidden md:hidden border-t border-gray-200">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <% if authenticated? %>
+          <%= link_to "Dashboard", root_path, class: "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
+          <div class="px-3 py-2 border-t border-gray-200 mt-2">
+            <p class="text-sm text-gray-500">Signed in as</p>
+            <p class="text-sm font-medium text-gray-900"><%= Current.user.email_address %></p>
+          </div>
+          <%= link_to "Settings", "#", class: "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
+          <%= button_to "Sign out", signout_path, method: :delete, class: "w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors border-0 bg-transparent" %>
+        <% else %>
+          <%= link_to "Features", "#features", class: "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
+          <%= link_to "Pricing", "#pricing", class: "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
+          <%= link_to "Sign in", signin_path, class: "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
+          <%= link_to "Get Started", signup_path, class: "block px-3 py-2 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

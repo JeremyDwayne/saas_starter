@@ -23,9 +23,18 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="bg-white min-h-screen flex flex-col">
+    <%= render 'shared/navbar' %>
+
+    <main class="flex-1 pt-20">
       <%= yield %>
     </main>
+
+    <%= render 'shared/footer' %>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2">
+      <%= render_flash_toasts %>
+    </div>
   </body>
 </html>

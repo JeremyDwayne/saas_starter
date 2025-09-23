@@ -1,0 +1,46 @@
+<%# Toast notification component %>
+<div data-controller="toast"
+     data-toast-type-value="<%= type %>"
+     data-toast-auto-dismiss-value="true"
+     data-toast-duration-value="5000"
+     class="fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 ease-in-out opacity-0 translate-x-full"
+     data-toast-target="container">
+
+  <div class="bg-white rounded-lg shadow-lg border-l-4 p-4 <%= toast_border_color(type) %>">
+    <div class="flex items-start">
+      <!-- Icon -->
+      <div class="flex-shrink-0">
+        <%= render "shared/toast_icon", type: type %>
+      </div>
+
+      <!-- Content -->
+      <div class="ml-3 flex-1">
+        <% if defined?(title) && title %>
+          <h3 class="text-sm font-medium <%= toast_title_color(type) %>">
+            <%= title %>
+          </h3>
+        <% end %>
+        <div class="text-sm <%= toast_text_color(type) %> <%= 'mt-1' if defined?(title) && title %>">
+          <%= message %>
+        </div>
+      </div>
+
+      <!-- Close button -->
+      <div class="ml-4 flex-shrink-0 flex">
+        <button type="button"
+                data-action="click->toast#dismiss"
+                class="inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md">
+          <span class="sr-only">Close</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Progress bar for auto-dismiss -->
+    <div data-toast-target="progressBar" class="mt-3 bg-gray-200 rounded-full h-1 <%= toast_progress_color(type) %>">
+      <div data-toast-target="progress" class="h-1 rounded-full transition-all ease-linear <%= toast_progress_bg_color(type) %>" style="width: 100%;"></div>
+    </div>
+  </div>
+</div>

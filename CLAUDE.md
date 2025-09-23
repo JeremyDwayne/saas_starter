@@ -63,6 +63,9 @@ brakeman
 
 # Linting (Omakase Ruby style)
 rubocop
+
+# Auto-fix linting issues
+rubocop -A
 ```
 
 ## Architecture
@@ -104,3 +107,14 @@ rubocop
 - **Views**: Tailwind CSS for styling, Turbo for interactions
 - **Testing**: Minitest with fixtures, includes session test helpers
 - **Security**: CSRF protection, secure password handling, content security policy
+
+## Git Hooks
+
+### Pre-commit Hook
+- **Automatic RuboCop**: Runs `rubocop -A` on staged Ruby files before each commit
+- **Auto-correction**: Fixes formatting issues automatically and re-stages files
+- **Quality gate**: Prevents commits if unfixable style issues exist
+- **Configuration**: Uses Rails Omakase style guide
+- **Bypass**: Use `git commit --no-verify` only for emergencies
+
+The pre-commit hook ensures consistent code style across all commits without manual intervention.

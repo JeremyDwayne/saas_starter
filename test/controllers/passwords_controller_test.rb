@@ -11,19 +11,19 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
   test "create" do
     post passwords_path, params: { email_address: @user.email_address }
     assert_enqueued_email_with PasswordsMailer, :reset, args: [ @user ]
-    assert_redirected_to new_session_path
+    assert_redirected_to signin_path
 
     follow_redirect!
-    assert_notice "reset instructions sent"
+    assert_notice "Password reset instructions sent"
   end
 
   test "create for an unknown user redirects but sends no mail" do
     post passwords_path, params: { email_address: "missing-user@example.com" }
     assert_enqueued_emails 0
-    assert_redirected_to new_session_path
+    assert_redirected_to signin_path
 
     follow_redirect!
-    assert_notice "reset instructions sent"
+    assert_notice "Password reset instructions sent"
   end
 
   test "edit" do
@@ -36,13 +36,13 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_password_path
 
     follow_redirect!
-    assert_notice "reset link is invalid"
+    assert_notice "Password reset link is invalid"
   end
 
   test "update" do
     assert_changes -> { @user.reload.password_digest } do
-      put password_path(@user.password_reset_token), params: { password: "new", password_confirmation: "new" }
-      assert_redirected_to new_session_path
+      put password_path(@user.password_reset_token), params: { password: "newpassword", password_confirmation: "newpassword" }
+      assert_redirected_to signin_path
     end
 
     follow_redirect!
@@ -60,8 +60,4 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_notice "Passwords did not match"
   end
 
-  private
-    def assert_notice(text)
-      assert_select "div", /#{text}/
-    end
 end

@@ -59,5 +59,4 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_notice "Passwords did not match"
   end
-
 end

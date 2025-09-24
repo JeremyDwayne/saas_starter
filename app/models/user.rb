@@ -8,10 +8,10 @@ class User < ApplicationRecord
   validates :email_address, presence: true,
             format: { with: URI::MailTo::EMAIL_REGEXP },
             uniqueness: { case_sensitive: false }
-  validates :password, on: [ :registration, :password_change, :create ],
+  validates :password, on: [ :registration, :password_change ],
             presence: true,
             length: { minimum: 8, maximum: 72 }
-  validates :password_confirmation, on: [ :registration, :password_change, :create ],
+  validates :password_confirmation, on: [ :registration, :password_change ],
             presence: true
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
@@ -21,6 +21,8 @@ class User < ApplicationRecord
     user = self.new email_address: email, password: SecureRandom.base64(64).truncate_bytes(64)
     # TODO: you could save additional information about the user from the OAuth sign in
     # assign_names_from_auth(auth, user)
+
+    # Save without validation context (password validations won't apply)
     user.save
     user
   end

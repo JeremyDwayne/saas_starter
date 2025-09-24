@@ -31,7 +31,12 @@ class Sessions::OmniAuthsController < ApplicationController
       if identity.nil?
         # New identity visiting the site, we are linking to an existing User or creating a new one
         user = User.find_by(email_address: auth.info.email) || User.create_from_oauth(auth)
-        identity = OmniAuthIdentity.create(uid: uid, provider: provider, user: user)
+
+        if user.persisted?
+          identity = OmniAuthIdentity.create!(uid: uid, provider: provider, user: user)
+        else
+          redirect_to signin_path, alert: "Failed to create account. Please try again." and return
+        end
       end
       start_new_session_for identity.user
       redirect_to redirect_path, notice: "Signed in!"
@@ -39,6 +44,6 @@ class Sessions::OmniAuthsController < ApplicationController
   end
 
   def failure
-    redirect_to new_session_path, alert: "Authentication failed, please try again."
+    redirect_to signin_path, alert: "Authentication failed, please try again."
   end
 end

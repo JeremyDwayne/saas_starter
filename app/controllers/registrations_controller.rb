@@ -8,7 +8,7 @@ class RegistrationsController < ApplicationController
   def create
     @user = User.new(user_params)
 
-    if @user.save
+    if @user.save(context: :registration)
       start_new_session_for(@user, source: "registration")
       flash[:notice] = "Welcome! Your account has been created successfully."
       redirect_to after_authentication_url

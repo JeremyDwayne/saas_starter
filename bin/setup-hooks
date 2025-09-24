@@ -1,0 +1,116 @@
+#!/usr/bin/env ruby
+
+# Setup script to install Git hooks for this project
+# Run this after cloning the repository: ./bin/setup-hooks
+
+require 'fileutils'
+
+puts "🔧 Setting up Git hooks for this project..."
+
+# Define the pre-commit hook content
+pre_commit_hook = <<~'HOOK'
+#!/bin/bash
+
+# Pre-commit hook to run rubocop with auto-correction
+# This ensures code style consistency before commits
+
+echo "Running rubocop auto-correction..."
+
+# Get list of staged Ruby files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(rb|rake)$|Rakefile|Gemfile')
+
+if [ -z "$staged_files" ]; then
+  echo "No Ruby files to check."
+  exit 0
+fi
+
+# Run rubocop with auto-correction on staged files
+bundle exec rubocop -A $staged_files
+
+# Check the exit status
+rubocop_exit_code=$?
+
+if [ $rubocop_exit_code -ne 0 ]; then
+  echo ""
+  echo "❌ Rubocop found issues that couldn't be auto-corrected."
+  echo "Please fix the remaining issues and try committing again."
+  echo ""
+  echo "To see the issues:"
+  echo "  bundle exec rubocop $staged_files"
+  echo ""
+  echo "To fix auto-correctable issues:"
+  echo "  bundle exec rubocop -A $staged_files"
+  echo ""
+  exit 1
+fi
+
+# Add any auto-corrected files back to the staging area
+for file in $staged_files; do
+  if [ -f "$file" ]; then
+    git add "$file"
+  fi
+done
+
+echo "✅ Rubocop auto-correction completed successfully."
+echo ""
+
+exit 0
+HOOK
+
+# Path to the hooks directory
+hooks_dir = '.git/hooks'
+pre_commit_path = File.join(hooks_dir, 'pre-commit')
+
+# Check if we're in a git repository
+unless Dir.exist?('.git')
+  puts "❌ Error: This doesn't appear to be a Git repository."
+  puts "   Make sure you're running this from the project root directory."
+  exit 1
+end
+
+# Create hooks directory if it doesn't exist
+FileUtils.mkdir_p(hooks_dir) unless Dir.exist?(hooks_dir)
+
+# Check if pre-commit hook already exists
+if File.exist?(pre_commit_path)
+  puts "⚠️  Pre-commit hook already exists."
+
+  # Check if we're in an interactive terminal
+  if STDIN.tty?
+    print "   Do you want to overwrite it? (y/N): "
+    response = gets&.chomp&.downcase
+
+    unless response == 'y' || response == 'yes'
+      puts "❌ Setup cancelled."
+      exit 0
+    end
+  else
+    puts "   Running in non-interactive mode. Use --force to overwrite."
+    unless ARGV.include?('--force')
+      puts "❌ Setup cancelled. Run with --force to overwrite existing hook."
+      exit 0
+    end
+    puts "   Forcing overwrite due to --force flag."
+  end
+end
+
+# Write the pre-commit hook
+File.write(pre_commit_path, pre_commit_hook)
+
+# Make it executable
+File.chmod(0755, pre_commit_path)
+
+puts "✅ Pre-commit hook installed successfully!"
+puts ""
+puts "What this hook does:"
+puts "  • Runs 'rubocop -A' on staged Ruby files before each commit"
+puts "  • Auto-corrects fixable style issues"
+puts "  • Prevents commits if unfixable issues exist"
+puts "  • Uses Rails Omakase style guide"
+puts ""
+puts "To bypass the hook in emergencies:"
+puts "  git commit --no-verify -m 'Emergency commit'"
+puts ""
+puts "For more information, see .githooks/README.md"
+puts ""
+puts "🎉 You're all set! The hook will run automatically on your next commit."

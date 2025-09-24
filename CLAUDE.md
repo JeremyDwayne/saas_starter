@@ -110,6 +110,12 @@ rubocop -A
 
 ## Git Hooks
 
+### Setup Required
+After cloning this repository, developers must run:
+```bash
+./bin/setup-hooks
+```
+
 ### Pre-commit Hook
 - **Automatic RuboCop**: Runs `rubocop -A` on staged Ruby files before each commit
 - **Auto-correction**: Fixes formatting issues automatically and re-stages files

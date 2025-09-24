@@ -2,6 +2,16 @@
 
 This directory contains information about the Git hooks configured for this project.
 
+## Setup (Required after cloning)
+
+**Important**: Git hooks are not automatically installed when you clone a repository. After cloning this project, run:
+
+```bash
+./bin/setup-hooks
+```
+
+This will install the pre-commit hook locally on your machine.
+
 ## Pre-commit Hook
 
 A pre-commit hook has been set up to automatically run RuboCop with auto-correction (`-A` flag) on all staged Ruby files before each commit.

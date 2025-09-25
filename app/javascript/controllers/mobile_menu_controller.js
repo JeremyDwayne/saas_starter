@@ -3,6 +3,10 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["menu", "openIcon", "closeIcon"]
 
+  connect() {
+    this.close = this.close.bind(this)
+  }
+
   toggle(event) {
     event.preventDefault()
     if (this.menuTarget.classList.contains("hidden")) {
@@ -16,11 +20,19 @@ export default class extends Controller {
     this.menuTarget.classList.remove("hidden")
     this.openIconTarget.classList.add("hidden")
     this.closeIconTarget.classList.remove("hidden")
+    document.addEventListener("click", this.close)
   }
 
-  close() {
-    this.menuTarget.classList.add("hidden")
-    this.openIconTarget.classList.remove("hidden")
-    this.closeIconTarget.classList.add("hidden")
+  close(event) {
+    if (!event || !this.element.contains(event.target)) {
+      this.menuTarget.classList.add("hidden")
+      this.openIconTarget.classList.remove("hidden")
+      this.closeIconTarget.classList.add("hidden")
+      document.removeEventListener("click", this.close)
+    }
+  }
+
+  disconnect() {
+    document.removeEventListener("click", this.close)
   }
 }

@@ -8,3 +8,18 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Pricing Toggle Styles */
+.pricing-toggle {
+  color: #6b7280;
+}
+
+.pricing-toggle.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.pricing-toggle:not(.active):hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}

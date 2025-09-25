@@ -30,7 +30,15 @@ class Sessions::OmniAuthsController < ApplicationController
       # Check if identity was found i.e. user has visited the site before
       if identity.nil?
         # New identity visiting the site, we are linking to an existing User or creating a new one
-        user = User.find_by(email_address: auth.info.email) || User.create_from_oauth(auth)
+        user = User.find_by(email_address: auth.info.email)
+
+        if user
+          # Existing user - update their info with OAuth data
+          user.signed_in_with_oauth(auth)
+        else
+          # New user - create from OAuth
+          user = User.create_from_oauth(auth)
+        end
 
         if user.persisted?
           identity = OmniAuthIdentity.create!(uid: uid, provider: provider, user: user)

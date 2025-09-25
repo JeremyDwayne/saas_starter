@@ -3,6 +3,8 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :omni_auth_identities, dependent: :destroy
 
+  pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   validates :email_address, presence: true,
@@ -18,18 +20,39 @@ class User < ApplicationRecord
 
   def self.create_from_oauth(auth)
     email = auth.info.email
-    user = self.new email_address: email, password: SecureRandom.base64(64).truncate_bytes(64)
-    # TODO: you could save additional information about the user from the OAuth sign in
-    # assign_names_from_auth(auth, user)
+    name = auth.info.name || auth.info.nickname || email.split("@").first
+    avatar_url = auth.info.image
 
+    user = self.new(
+      email_address: email,
+      name: name,
+      avatar_url: avatar_url,
+      password: SecureRandom.base64(64).truncate_bytes(64)
+    )
     # Save without validation context (password validations won't apply)
     user.save
     user
   end
 
   def signed_in_with_oauth(auth)
-    # TODO: same as above, you could save additional information about the user
-    # User.assign_names_from_auth(auth, self)
-    # save if first_name_changed? || last_name_changed?
+    # Update user info when signing in with OAuth (if they link additional providers)
+    update_attributes = {}
+
+    # Only update name if we don't have one or if the OAuth provider has a better one
+    if name.blank? || (auth.info.name.present? && name == email_address.split("@").first)
+      update_attributes[:name] = auth.info.name || auth.info.nickname
+    end
+
+    # Update avatar if we don't have one or if the OAuth provider has a different one
+    if avatar_url.blank? || avatar_url != auth.info.image
+      update_attributes[:avatar_url] = auth.info.image
+    end
+
+    update(update_attributes) if update_attributes.any?
+  end
+
+  def pay_should_sync_customer?
+    # super will invoke Pay's default (e-mail changed)
+    super || self.saved_change_to_name?
   end
 end

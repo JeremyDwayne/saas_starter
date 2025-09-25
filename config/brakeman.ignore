@@ -1,0 +1,26 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Dangerous Eval",
+      "warning_code": 13,
+      "fingerprint": "f88611c38e2cc144be3a3a69fc6c96768c82211a4cb026bb124c2a65c4287f70",
+      "check_name": "Evaluation",
+      "message": "Dynamic string evaluated as code",
+      "file": "lib/active_record/detect_unsafe_migrations.rb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/dangerous_eval/",
+      "code": "self.instance_eval(\"def change\\n  execute \\\"ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(\"_#{version}_#{table_name}_del\")}\\\"\\nend\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::Migration",
+        "method": "s(:self).change_table_and_warn"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "note": "This eval is safe - it generates a simple ALTER TABLE statement for migration safety"
+    }
+  ],
+  "updated": "2025-09-24 00:00:00 +0000",
+  "brakeman_version": "7.1.0"
+}

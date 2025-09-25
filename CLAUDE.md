@@ -68,6 +68,15 @@ rubocop
 rubocop -A
 ```
 
+### Migration Safety
+```bash
+# Run migrations with safety checks (production)
+bin/rails db:migrate
+
+# Force unsafe migrations (development only)
+FORCE_MIGRATION=true bin/rails db:migrate
+```
+
 ## Architecture
 
 ### Authentication System
@@ -91,8 +100,17 @@ rubocop -A
 
 ### Database Schema
 - Uses SQLite with UUID extension for IDs
-- Three main tables: `users`, `sessions`, `omni_auth_identities`
+- Core tables: `users`, `sessions`, `omni_auth_identities`
+- Payment tables: Pay gem integration for Stripe subscriptions
 - Solid Cache/Queue/Cable tables for Rails services
+
+### Migration Safety System
+- **Unsafe migration detection** prevents dangerous operations on large tables
+- **Automatic checks** for table size (>5GB) and row count (>5M rows)
+- **SQLite optimized** with appropriate size estimation methods
+- **Development bypass** using `FORCE_MIGRATION=true`
+- **Smart handling** of `execute`, `change_column`, and `drop_table` operations
+- **Configuration**: `lib/active_record/detect_unsafe_migrations.rb`
 
 ## Configuration Notes
 

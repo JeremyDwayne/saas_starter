@@ -1,0 +1,286 @@
+<!-- Pricing Page -->
+<div class="bg-white">
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        Simple, Transparent Pricing
+      </h1>
+      <p class="text-xl text-blue-100 max-w-3xl mx-auto">
+        Choose the perfect plan for your needs. Start with Personal and scale as you grow.
+      </p>
+    </div>
+  </div>
+
+  <!-- Pricing Cards -->
+  <div class="py-16 bg-gray-50" data-controller="pricing-toggle">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Pricing Toggle -->
+      <div class="flex justify-center mb-12">
+        <div class="bg-white p-1 rounded-lg shadow-sm border border-gray-200">
+          <div class="flex">
+            <button class="pricing-toggle px-6 py-2 text-sm font-medium rounded-md transition-colors active"
+                    data-period="monthly"
+                    data-pricing-toggle-target="toggle"
+                    data-action="click->pricing-toggle#switch">
+              Monthly
+            </button>
+            <button class="pricing-toggle px-6 py-2 text-sm font-medium rounded-md transition-colors"
+                    data-period="annual"
+                    data-pricing-toggle-target="toggle"
+                    data-action="click->pricing-toggle#switch">
+              Annual
+              <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Save 20%</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Personal Plan -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative">
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Personal</h3>
+            <div class="mb-6">
+              <span class="text-5xl font-bold text-gray-900 price-amount" data-monthly="9" data-annual="86" data-pricing-toggle-target="priceAmount">$9</span>
+              <span class="text-gray-500 ml-2 price-period" data-pricing-toggle-target="pricePeriod">/month</span>
+              <div class="annual-savings text-sm text-green-600 font-medium mt-1" style="display: none;" data-pricing-toggle-target="annualSavings">
+                Save $22/year
+              </div>
+            </div>
+            <p class="text-gray-600 mb-8">Perfect for individuals and small projects</p>
+
+            <!-- Features -->
+            <ul class="space-y-4 mb-8 text-left">
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Up to 3 projects</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Basic analytics</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Community support</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">1 GB storage</span>
+              </li>
+            </ul>
+
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+              Get Started
+            </button>
+          </div>
+        </div>
+
+        <!-- Pro Plan -->
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-8 relative transform lg:scale-105">
+          <!-- Popular Badge -->
+          <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+            <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+              Most Popular
+            </span>
+          </div>
+
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Professional</h3>
+            <div class="mb-6">
+              <span class="text-5xl font-bold text-gray-900 price-amount" data-monthly="29" data-annual="278" data-pricing-toggle-target="priceAmount">$29</span>
+              <span class="text-gray-500 ml-2 price-period" data-pricing-toggle-target="pricePeriod">/month</span>
+              <div class="annual-savings text-sm text-green-600 font-medium mt-1" style="display: none;" data-pricing-toggle-target="annualSavings">
+                Save $70/year
+              </div>
+            </div>
+            <p class="text-gray-600 mb-8">Best for growing businesses</p>
+
+            <!-- Features -->
+            <ul class="space-y-4 mb-8 text-left">
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Unlimited projects</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Advanced analytics & reports</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Priority email support</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">100 GB storage</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">API access</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Team collaboration (up to 10 members)</span>
+              </li>
+            </ul>
+
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+              Start Free Trial
+            </button>
+            <p class="text-sm text-gray-500 mt-2">14-day free trial, no credit card required</p>
+          </div>
+        </div>
+
+        <!-- Enterprise Plan -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative">
+          <div class="text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+            <div class="mb-6">
+              <span class="text-5xl font-bold text-gray-900 price-amount" data-monthly="99" data-annual="950" data-pricing-toggle-target="priceAmount">$99</span>
+              <span class="text-gray-500 ml-2 price-period" data-pricing-toggle-target="pricePeriod">/month</span>
+              <div class="annual-savings text-sm text-green-600 font-medium mt-1" style="display: none;" data-pricing-toggle-target="annualSavings">
+                Save $238/year
+              </div>
+            </div>
+            <p class="text-gray-600 mb-8">For large organizations</p>
+
+            <!-- Features -->
+            <ul class="space-y-4 mb-8 text-left">
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Everything in Professional</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Unlimited team members</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">1 TB storage</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">24/7 phone & chat support</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Custom integrations</span>
+              </li>
+              <li class="flex items-center">
+                <svg class="w-5 h-5 text-green-500 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span class="text-gray-700">Advanced security & compliance</span>
+              </li>
+            </ul>
+
+            <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
+              Contact Sales
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        <p class="text-xl text-gray-600">Everything you need to know about our pricing</p>
+      </div>
+
+      <div class="space-y-8">
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I change my plan anytime?</h3>
+          <p class="text-gray-600">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately and you'll be prorated accordingly.</p>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">What payment methods do you accept?</h3>
+          <p class="text-gray-600">We accept all major credit cards (Visa, MasterCard, American Express) and PayPal. Enterprise customers can also pay by invoice.</p>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Is there a free trial for paid plans?</h3>
+          <p class="text-gray-600">Yes! Professional and Enterprise plans come with a 14-day free trial. No credit card required to start your trial.</p>
+        </div>
+
+        <div class="border-b border-gray-200 pb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">What happens to my data if I cancel?</h3>
+          <p class="text-gray-600">Your data remains accessible for 30 days after cancellation. You can export all your data during this period or reactivate your account.</p>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Do you offer discounts for nonprofits or education?</h3>
+          <p class="text-gray-600">Yes! We offer special pricing for qualified nonprofits, educational institutions, and open-source projects. Contact our sales team for details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="bg-gray-50 py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+      <p class="text-xl text-gray-600 mb-8">Join thousands of users who trust our platform to power their business.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <% unless authenticated? %>
+          <%= link_to "Get Started Today", signup_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors" %>
+        <% end %>
+        <button class="border border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-semibold transition-colors">
+          Contact Sales
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Pricing Toggle Styles -->
+<style>
+  .pricing-toggle {
+    color: #6b7280;
+  }
+
+  .pricing-toggle.active {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .pricing-toggle:not(.active):hover {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+</style>

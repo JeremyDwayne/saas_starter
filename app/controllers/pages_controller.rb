@@ -1,7 +1,7 @@
-class HomeController < ApplicationController
+class PagesController < ApplicationController
   allow_unauthenticated_access
 
-  def index
+  def home
     # Demo flash messages for testing toasts
     if params[:demo_flash]
       case params[:demo_flash]
@@ -16,5 +16,8 @@ class HomeController < ApplicationController
       end
       redirect_to root_path
     end
+  end
+
+  def pricing
   end
 end

@@ -14,3 +14,19 @@ require "#{__dir__}/scripts/setup_github"
 require "#{__dir__}/scripts/commit_changes"
 
 announce_section "Configuration complete!"
+
+puts "🎉 Your Rails SaaS application has been configured!".green
+puts ""
+puts "Next steps:".blue
+puts "1. Review and update config/credentials.yml.enc with your API keys"
+puts "2. Update .kamal/secrets with your production environment variables"
+puts "3. Configure your production server and domain in config/deploy.yml (if not done already)"
+puts "4. Test your application locally with: bin/dev"
+puts "5. Deploy to production with: bin/kamal setup && bin/kamal deploy"
+puts ""
+puts "Documentation:".blue
+puts "- Check CLAUDE.md for development guidelines"
+puts "- See config/credentials.example.yml for required credentials structure"
+puts "- Visit https://kamal-deploy.org for deployment documentation"
+puts ""
+puts "Happy coding! 🚀".green

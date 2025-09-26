@@ -50,8 +50,15 @@ class SubscriptionsController < ApplicationController
         }
       )
 
-      # Redirect to Stripe Checkout
-      redirect_to checkout_session.url, allow_other_host: true, status: :see_other
+      # Validate and redirect to Stripe Checkout
+      checkout_url = checkout_session.url
+      unless valid_stripe_checkout_url?(checkout_url)
+        Rails.logger.error "Invalid checkout URL: #{checkout_url}"
+        redirect_to pricing_path, alert: "Unable to start checkout. Please try again."
+        return
+      end
+
+      redirect_to checkout_url, allow_other_host: true, status: :see_other
 
     rescue => e
       Rails.logger.error "Checkout session creation error: #{e.message}"
@@ -84,6 +91,22 @@ class SubscriptionsController < ApplicationController
   end
 
   private
+
+  def valid_stripe_checkout_url?(url)
+    return false if url.blank?
+
+    begin
+      uri = URI.parse(url)
+      # Only allow Stripe's checkout domains
+      allowed_hosts = [
+        "checkout.stripe.com",
+        "js.stripe.com"
+      ]
+      allowed_hosts.include?(uri.host) && uri.scheme == "https"
+    rescue URI::InvalidURIError
+      false
+    end
+  end
 
   def create_stripe_price(plan_id, plan_config)
     puts "Creating Stripe Price for #{plan_id} with amount #{plan_config[:amount]} and interval #{plan_config[:interval]}"

@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+# Require a util file that will install a few utility gems
+# and define some utility methods used by other scirpts.
+require "#{__dir__}/scripts/utils"
+
+# Change instances of "Saas Starter" and `saas_starter` to your app's name
+require "#{__dir__}/scripts/update_configs"
+
+# Now we connect your local repo to GitHub if you want
+require "#{__dir__}/scripts/setup_github"
+
+# Commit the changes we've made
+require "#{__dir__}/scripts/commit_changes"
+
+announce_section "Configuration complete!"

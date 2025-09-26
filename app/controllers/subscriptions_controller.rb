@@ -2,6 +2,7 @@ class SubscriptionsController < ApplicationController
   def create
     plan_id = params[:plan_id]
     billing_cycle = params[:billing_cycle] || "month"
+    trial_days = 14
 
     # Define plan configurations with Stripe Price IDs
     # In production, create these prices in your Stripe Dashboard
@@ -42,7 +43,7 @@ class SubscriptionsController < ApplicationController
           quantity: 1
         } ],
         subscription_data: {
-          trial_period_days: (plan_id == "professional" ? 14 : 0),
+          trial_period_days: trial_days,
           metadata: {
             pay_name: plan_id
           }

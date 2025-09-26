@@ -26,8 +26,13 @@ Rails.application.routes.draw do
   get "/pricing", to: "pages#pricing"
   get "/dashboard", to: "pages#dashboard"
 
-  # Pay routes (for webhooks and billing portal)
-  mount Pay::Engine, at: "/pay"
+  # Settings routes
+  get "/settings", to: "settings#show", as: :settings
+  patch "/settings/profile", to: "settings#update_profile", as: :update_profile_settings
+  patch "/settings/password", to: "settings#update_password", as: :update_password_settings
+  delete "/settings/account", to: "settings#destroy_account", as: :destroy_account_settings
+
+  # Pay routes are automatically mounted by the gem
 
   # Subscription routes
   resources :subscriptions, only: [ :create ] do

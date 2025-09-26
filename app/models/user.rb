@@ -61,4 +61,27 @@ class User < ApplicationRecord
   def email
     email_address
   end
+
+  # Convenience methods for subscription status
+  def subscribed?
+    # Check if user has any active subscription (including trials)
+    return false unless payment_processor
+    payment_processor.subscriptions.active.any?
+  end
+
+  def subscription
+    # Get the most recent active subscription
+    return nil unless payment_processor
+    payment_processor.subscriptions.active.order(created_at: :desc).first
+  end
+
+  def on_trial?
+    # Check if any subscription is on trial
+    return false unless payment_processor
+    payment_processor.subscriptions.on_trial.any?
+  end
+
+  def on_trial_or_subscribed?
+    subscribed? || on_trial?
+  end
 end

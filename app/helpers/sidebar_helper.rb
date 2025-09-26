@@ -19,7 +19,7 @@ module SidebarHelper
         items << {
           name: "Billing",
           path: "/pay/subscriptions",
-          icon: "credit_card",
+          icon: "credit-card",
           active: false # Pay routes don't have easy current_page check
         }
       end

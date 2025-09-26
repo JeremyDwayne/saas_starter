@@ -1,0 +1,179 @@
+<!-- Sidebar for desktop -->
+<div class="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:pt-16 transition-all duration-300"
+     data-controller="sidebar"
+     data-sidebar-collapsed-value="false"
+     data-sidebar-target="sidebar">
+  <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
+    <nav class="flex flex-1 flex-col pt-4">
+      <ul role="list" class="flex flex-1 flex-col gap-y-7">
+        <li>
+          <ul role="list" class="-mx-2 space-y-1">
+            <% sidebar_navigation_items.each do |item| %>
+              <li>
+                <div class="relative">
+                  <%= link_to item[:path],
+                      class: sidebar_nav_item_classes(active: item[:active]),
+                      data: {
+                        sidebar_target: "navItem",
+                        action: "mouseenter->sidebar#navItemHover mouseleave->sidebar#navItemLeave",
+                        nav_name: item[:name]
+                      } do %>
+                    <%= icon item[:icon] %>
+                    <span data-sidebar-target="navText"><%= item[:name] %></span>
+                  <% end %>
+
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </li>
+
+        <!-- Bottom section -->
+        <li class="mt-auto">
+          <div class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700">
+            <% if Current.user.avatar_url.present? %>
+              <img
+                src="<%= Current.user.avatar_url %>"
+                alt="<%= Current.user.name || Current.user.email_address %>"
+                class="h-6 w-6 shrink-0 rounded-full bg-gray-50"
+                referrerpolicy="no-referrer"
+                crossorigin="anonymous"
+              >
+            <% else %>
+              <div class="h-6 w-6 shrink-0 rounded-full bg-gray-300 flex items-center justify-center">
+                <span class="text-xs font-medium text-gray-700">
+                  <%= (Current.user.name&.first || Current.user.email_address.first).upcase %>
+                </span>
+              </div>
+            <% end %>
+            <span class="sr-only">Your profile</span>
+            <span aria-hidden="true" data-sidebar-target="userInfo">
+              <%= Current.user.name&.split(" ")&.first || Current.user.email_address.split("@").first %>
+            </span>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- External collapse trigger - inside sidebar element for Stimulus controller access -->
+  <div class="absolute top-1/2 transform -translate-y-1/2 z-50 transition-all duration-300"
+       style="left: calc(100% - 8px);"
+       data-sidebar-target="trigger"
+       data-action="click->sidebar#toggle mouseenter->sidebar#triggerHover mouseleave->sidebar#triggerLeave">
+    <div class="flex items-center justify-center w-4 h-8 cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded transition-all">
+      <span data-sidebar-target="triggerIcon" class="text-gray-600 text-lg font-light select-none">|</span>
+    </div>
+    <!-- Custom tooltip -->
+    <div data-sidebar-target="tooltip"
+         class="absolute left-6 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap opacity-0 pointer-events-none transition-opacity duration-200 z-[100]">
+      Collapse
+    </div>
+  </div>
+</div>
+
+<!-- Global tooltip container for navigation items -->
+<div id="sidebar-tooltip" class="fixed bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap opacity-0 pointer-events-none transition-opacity duration-200 z-[100] hidden">
+</div>
+
+<!-- Mobile sidebar -->
+<div class="lg:hidden">
+  <div class="relative z-40 lg:hidden" role="dialog" aria-modal="true" data-controller="mobile-sidebar" data-mobile-sidebar-open-value="false">
+    <!-- Off-canvas menu backdrop -->
+    <div
+      data-mobile-sidebar-target="backdrop"
+      data-action="click->mobile-sidebar#close"
+      class="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear hidden"
+    ></div>
+
+    <!-- Off-canvas menu -->
+    <div class="fixed inset-0 flex" data-mobile-sidebar-target="panel">
+      <div class="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out -translate-x-full" data-mobile-sidebar-target="sidebar">
+        <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
+          <button
+            type="button"
+            class="-m-2.5 p-2.5"
+            data-action="click->mobile-sidebar#close"
+          >
+            <span class="sr-only">Close sidebar</span>
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4 pt-20">
+          <nav class="flex flex-1 flex-col">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+              <li>
+                <ul role="list" class="-mx-2 space-y-1">
+                  <li>
+                    <%= link_to '/dashboard',
+                        class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?('/dashboard') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
+                        data: { action: "click->mobile-sidebar#close" } do %>
+                      <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                      Dashboard
+                    <% end %>
+                  </li>
+
+                  <li>
+                    <%= link_to settings_path,
+                        class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(settings_path) ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
+                        data: { action: "click->mobile-sidebar#close" } do %>
+                      <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Settings
+                    <% end %>
+                  </li>
+
+                  <% if Current.user&.subscribed? %>
+                    <li>
+                      <%= link_to '/pay/subscriptions',
+                          class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:text-blue-600 hover:bg-gray-50",
+                          data: { action: "click->mobile-sidebar#close" } do %>
+                        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                        Billing
+                      <% end %>
+                    </li>
+                  <% end %>
+                </ul>
+              </li>
+
+              <!-- Mobile bottom section -->
+              <li class="mt-auto">
+                <div class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700">
+                  <% if Current.user.avatar_url.present? %>
+                    <img
+                      src="<%= Current.user.avatar_url %>"
+                      alt="<%= Current.user.name || Current.user.email_address %>"
+                      class="h-6 w-6 shrink-0 rounded-full bg-gray-50"
+                      referrerpolicy="no-referrer"
+                      crossorigin="anonymous"
+                    >
+                  <% else %>
+                    <div class="h-6 w-6 shrink-0 rounded-full bg-gray-300 flex items-center justify-center">
+                      <span class="text-xs font-medium text-gray-700">
+                        <%= (Current.user.name&.first || Current.user.email_address.first).upcase %>
+                      </span>
+                    </div>
+                  <% end %>
+                  <span class="sr-only">Your profile</span>
+                  <span aria-hidden="true">
+                    <%= Current.user.name&.split(" ")&.first || Current.user.email_address.split("@").first %>
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

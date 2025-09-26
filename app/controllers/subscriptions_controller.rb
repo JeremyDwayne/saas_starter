@@ -1,4 +1,5 @@
 class SubscriptionsController < ApplicationController
+  layout "dashboard", only: [ :success ]
   def create
     plan_id = params[:plan_id]
     billing_cycle = params[:billing_cycle] || "month"

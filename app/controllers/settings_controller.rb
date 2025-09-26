@@ -1,4 +1,5 @@
 class SettingsController < ApplicationController
+  layout "dashboard"
   before_action :set_user
 
   def show

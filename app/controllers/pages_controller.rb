@@ -1,5 +1,6 @@
 class PagesController < ApplicationController
   allow_unauthenticated_access except: [ :dashboard ]
+  layout "dashboard", only: [ :dashboard ]
 
   def home
     # Demo flash messages for testing toasts

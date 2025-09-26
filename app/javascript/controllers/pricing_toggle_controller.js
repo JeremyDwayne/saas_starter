@@ -10,6 +10,13 @@ export default class extends Controller {
   switch(event) {
     const period = event.target.dataset.period
     this.updatePricing(period)
+
+    // Dispatch event for subscription forms to listen to
+    const customEvent = new CustomEvent('pricing-toggle:changed', {
+      detail: { period: period },
+      bubbles: true
+    })
+    document.dispatchEvent(customEvent)
   }
 
   updatePricing(period) {

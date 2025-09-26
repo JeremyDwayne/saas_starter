@@ -1,5 +1,5 @@
 class PagesController < ApplicationController
-  allow_unauthenticated_access
+  allow_unauthenticated_access except: [ :dashboard ]
 
   def home
     # Demo flash messages for testing toasts
@@ -19,5 +19,10 @@ class PagesController < ApplicationController
   end
 
   def pricing
+  end
+
+  def dashboard
+    """Dashboard page for authenticated users"""
+    # Authentication is handled by ApplicationController automatically
   end
 end

@@ -24,6 +24,19 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "/pricing", to: "pages#pricing"
+  get "/dashboard", to: "pages#dashboard"
+
+  # Pay routes (for webhooks and billing portal)
+  mount Pay::Engine, at: "/pay"
+
+  # Subscription routes
+  resources :subscriptions, only: [ :create ] do
+    collection do
+      get :success
+      get :cancel
+      delete :cancel_subscription
+    end
+  end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

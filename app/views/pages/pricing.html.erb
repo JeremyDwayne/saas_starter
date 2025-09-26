@@ -78,9 +78,11 @@
               </li>
             </ul>
 
-            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
-              Get Started
-            </button>
+            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "personal", turbo: false } do |form| %>
+              <%= form.hidden_field :plan_id, value: "personal" %>
+              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+              <%= form.submit "Get Started", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% end %>
           </div>
         </div>
 
@@ -144,9 +146,11 @@
               </li>
             </ul>
 
-            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
-              Start Free Trial
-            </button>
+            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "professional", turbo: false } do |form| %>
+              <%= form.hidden_field :plan_id, value: "professional" %>
+              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+              <%= form.submit "Start Free Trial", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% end %>
             <p class="text-sm text-gray-500 mt-2">14-day free trial, no credit card required</p>
           </div>
         </div>
@@ -204,9 +208,11 @@
               </li>
             </ul>
 
-            <button class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors">
-              Contact Sales
-            </button>
+            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "enterprise", turbo: false } do |form| %>
+              <%= form.hidden_field :plan_id, value: "enterprise" %>
+              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+              <%= form.submit "Contact Sales", class: "w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% end %>
           </div>
         </div>
 

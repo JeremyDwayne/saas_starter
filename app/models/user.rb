@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_many :omni_auth_identities, dependent: :destroy
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
+  pay_merchant
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
@@ -54,5 +55,10 @@ class User < ApplicationRecord
   def pay_should_sync_customer?
     # super will invoke Pay's default (e-mail changed)
     super || self.saved_change_to_name?
+  end
+
+  # Pay gem expects an email method, but we use email_address
+  def email
+    email_address
   end
 end

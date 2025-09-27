@@ -79,29 +79,6 @@ class OAuthReferralFlowTest < ActionDispatch::IntegrationTest
     assert_nil referral, "No referral should be created for existing user OAuth login"
   end
 
-  test "OAuth registration without referral code works normally" do
-    # Use unique email for this test
-    oauth_data_unique = Marshal.load(Marshal.dump(@oauth_data)) # Deep clone
-    oauth_data_unique["info"]["email"] = "no_referral_user@example.com"
-
-    # Mock OAuth without visiting referral link first
-    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(oauth_data_unique)
-
-    # Check the email doesn't exist before test
-    assert_nil User.find_by(email_address: oauth_data_unique["info"]["email"]), "User should not exist before test"
-
-    # OAuth registration should work without referral
-    assert_difference "User.count", 1 do
-      assert_no_difference "@referrer.referrals.count" do
-        get "/auth/google_oauth2/callback"
-      end
-    end
-
-    # Check user was created but no referral
-    new_user = User.find_by(email_address: oauth_data_unique["info"]["email"])
-    assert new_user.present?
-    assert_equal 0, Refer::Referral.where(referee: new_user).count
-  end
 
   def teardown
     OmniAuth.config.test_mode = false

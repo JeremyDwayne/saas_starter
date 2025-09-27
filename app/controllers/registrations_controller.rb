@@ -10,6 +10,12 @@ class RegistrationsController < ApplicationController
 
     if @user.save(context: :registration)
       refer @user #=> Looks up cookie and attempts referral
+
+      # Log referral creation in development
+      if Rails.env.development? && (referral = Refer::Referral.find_by(referee: @user))
+        Rails.logger.info "Referral created: Referrer #{referral.referrer_id}, Referee #{referral.referee_id}"
+      end
+
       start_new_session_for(@user, source: "registration")
       flash[:notice] = "Welcome! Your account has been created successfully."
       redirect_to after_authentication_url

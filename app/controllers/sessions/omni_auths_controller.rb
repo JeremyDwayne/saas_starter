@@ -31,6 +31,7 @@ class Sessions::OmniAuthsController < ApplicationController
       if identity.nil?
         # New identity visiting the site, we are linking to an existing User or creating a new one
         user = User.find_by(email_address: auth.info.email)
+        is_new_user = user.nil?
 
         if user
           # Existing user - update their info with OAuth data
@@ -42,6 +43,16 @@ class Sessions::OmniAuthsController < ApplicationController
 
         if user.persisted?
           identity = OmniAuthIdentity.create!(uid: uid, provider: provider, user: user)
+
+          # Track referral for new OAuth users only
+          if is_new_user
+            refer user
+
+            # Log referral creation in development
+            if Rails.env.development? && (referral = Refer::Referral.find_by(referee: user))
+              Rails.logger.info "OAuth referral created: Referrer #{referral.referrer_id}, Referee #{referral.referee_id}"
+            end
+          end
         else
           redirect_to signin_path, alert: "Failed to create account. Please try again." and return
         end

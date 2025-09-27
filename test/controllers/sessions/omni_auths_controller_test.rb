@@ -54,4 +54,25 @@ class Sessions::OmniAuthsControllerTest < ActionDispatch::IntegrationTest
       )
     end
   end
+
+  test "OAuth referral tracking for new users" do
+    referrer = users(:one)
+    referral_code = referrer.referral_codes.create
+
+    # Test that referral tracking works in the model layer
+    new_user = User.create!(
+      email_address: "referral_test@example.com",
+      name: "Referral Test User",
+      password: "password123"
+    )
+
+    # Simulate what the refer method does
+    result = Refer.refer(code: referral_code.code, referee: new_user)
+
+    # Check that referral was created
+    referral = referrer.referrals.find_by(referee: new_user)
+    assert referral.present?, "Referral should be created"
+    assert_equal referrer, referral.referrer
+    assert_equal new_user, referral.referee
+  end
 end

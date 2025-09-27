@@ -28,6 +28,8 @@ class Sessions::OmniAuthsController < ApplicationController
       end
     else
       # Check if identity was found i.e. user has visited the site before
+      user_to_sign_in = nil
+
       if identity.nil?
         # New identity visiting the site, we are linking to an existing User or creating a new one
         user = User.find_by(email_address: auth.info.email)
@@ -43,6 +45,7 @@ class Sessions::OmniAuthsController < ApplicationController
 
         if user.persisted?
           identity = OmniAuthIdentity.create!(uid: uid, provider: provider, user: user)
+          user_to_sign_in = user
 
           # Track referral for new OAuth users only
           if is_new_user
@@ -56,8 +59,12 @@ class Sessions::OmniAuthsController < ApplicationController
         else
           redirect_to signin_path, alert: "Failed to create account. Please try again." and return
         end
+      else
+        # Existing identity, use the associated user
+        user_to_sign_in = identity.user
       end
-      start_new_session_for identity.user
+
+      start_new_session_for user_to_sign_in
       redirect_to redirect_path, notice: "Signed in!"
     end
   end

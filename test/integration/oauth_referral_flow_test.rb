@@ -48,9 +48,14 @@ class OAuthReferralFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "OAuth login for existing user does not create referral" do
+    # Use unique email for this test
+    existing_email = "existing_user@example.com"
+    oauth_data_existing = Marshal.load(Marshal.dump(@oauth_data)) # Deep clone
+    oauth_data_existing["info"]["email"] = existing_email
+
     # Create existing user first
     existing_user = User.create!(
-      email_address: @oauth_data["info"]["email"],
+      email_address: existing_email,
       name: "Existing User",
       password: "password123"
     )
@@ -60,7 +65,7 @@ class OAuthReferralFlowTest < ActionDispatch::IntegrationTest
     assert_equal @referral_code.code, cookies[:refer_code]
 
     # Mock OAuth for existing user
-    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(@oauth_data)
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(oauth_data_existing)
 
     # OAuth login should not create new user or referral
     assert_no_difference "User.count" do
@@ -75,8 +80,15 @@ class OAuthReferralFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "OAuth registration without referral code works normally" do
+    # Use unique email for this test
+    oauth_data_unique = Marshal.load(Marshal.dump(@oauth_data)) # Deep clone
+    oauth_data_unique["info"]["email"] = "no_referral_user@example.com"
+
     # Mock OAuth without visiting referral link first
-    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(@oauth_data)
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new(oauth_data_unique)
+
+    # Check the email doesn't exist before test
+    assert_nil User.find_by(email_address: oauth_data_unique["info"]["email"]), "User should not exist before test"
 
     # OAuth registration should work without referral
     assert_difference "User.count", 1 do
@@ -86,7 +98,7 @@ class OAuthReferralFlowTest < ActionDispatch::IntegrationTest
     end
 
     # Check user was created but no referral
-    new_user = User.find_by(email_address: @oauth_data["info"]["email"])
+    new_user = User.find_by(email_address: oauth_data_unique["info"]["email"])
     assert new_user.present?
     assert_equal 0, Refer::Referral.where(referee: new_user).count
   end

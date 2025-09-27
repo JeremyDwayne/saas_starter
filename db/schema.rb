@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_09_27_000928) do
+ActiveRecord::Schema[8.1].define(version: 2025_09_27_195530) do
   create_table "omni_auth_identities", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "provider"
@@ -130,6 +130,43 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_27_000928) do
     t.index [ "resource", "action" ], name: "index_permissions_on_resource_and_action", unique: true
   end
 
+  create_table "refer_referral_codes", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.integer "referrals_count", default: 0
+    t.string "referrer_id", null: false
+    t.string "referrer_type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "visits_count", default: 0
+    t.index [ "code" ], name: "index_refer_referral_codes_on_code", unique: true
+    t.index [ "referrer_type", "referrer_id" ], name: "index_refer_referral_codes_on_referrer"
+  end
+
+  create_table "refer_referrals", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.string "referee_id", null: false
+    t.string "referee_type", null: false
+    t.string "referral_code_id"
+    t.string "referrer_id", null: false
+    t.string "referrer_type", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "referee_type", "referee_id" ], name: "index_refer_referrals_on_referee"
+    t.index [ "referral_code_id" ], name: "index_refer_referrals_on_referral_code_id"
+    t.index [ "referrer_type", "referrer_id" ], name: "index_refer_referrals_on_referrer"
+  end
+
+  create_table "refer_visits", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "ip"
+    t.string "referral_code_id", null: false
+    t.text "referrer"
+    t.string "referring_domain"
+    t.datetime "updated_at", null: false
+    t.text "user_agent"
+    t.index [ "referral_code_id" ], name: "index_refer_visits_on_referral_code_id"
+  end
+
   create_table "role_permissions", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "permission_id", null: false
@@ -182,6 +219,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_27_000928) do
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
+  add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "user_roles", "roles"

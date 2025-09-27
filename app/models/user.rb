@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  has_referrals
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :omni_auth_identities, dependent: :destroy

@@ -27,31 +27,6 @@
             <% end %>
           </ul>
         </li>
-
-        <!-- Bottom section -->
-        <li class="mt-auto">
-          <div class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700">
-            <% if Current.user.avatar_url.present? %>
-              <img
-                src="<%= Current.user.avatar_url %>"
-                alt="<%= Current.user.name || Current.user.email_address %>"
-                class="h-6 w-6 shrink-0 rounded-full bg-gray-50"
-                referrerpolicy="no-referrer"
-                crossorigin="anonymous"
-              >
-            <% else %>
-              <div class="h-6 w-6 shrink-0 rounded-full bg-gray-300 flex items-center justify-center">
-                <span class="text-xs font-medium text-gray-700">
-                  <%= (Current.user.name&.first || Current.user.email_address.first).upcase %>
-                </span>
-              </div>
-            <% end %>
-            <span class="sr-only">Your profile</span>
-            <span aria-hidden="true" data-sidebar-target="userInfo">
-              <%= Current.user.name&.split(" ")&.first || Current.user.email_address.split("@").first %>
-            </span>
-          </div>
-        </li>
       </ul>
     </nav>
   </div>
@@ -143,31 +118,6 @@
                     </li>
                   <% end %>
                 </ul>
-              </li>
-
-              <!-- Mobile bottom section -->
-              <li class="mt-auto">
-                <div class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700">
-                  <% if Current.user.avatar_url.present? %>
-                    <img
-                      src="<%= Current.user.avatar_url %>"
-                      alt="<%= Current.user.name || Current.user.email_address %>"
-                      class="h-6 w-6 shrink-0 rounded-full bg-gray-50"
-                      referrerpolicy="no-referrer"
-                      crossorigin="anonymous"
-                    >
-                  <% else %>
-                    <div class="h-6 w-6 shrink-0 rounded-full bg-gray-300 flex items-center justify-center">
-                      <span class="text-xs font-medium text-gray-700">
-                        <%= (Current.user.name&.first || Current.user.email_address.first).upcase %>
-                      </span>
-                    </div>
-                  <% end %>
-                  <span class="sr-only">Your profile</span>
-                  <span aria-hidden="true">
-                    <%= Current.user.name&.split(" ")&.first || Current.user.email_address.split("@").first %>
-                  </span>
-                </div>
               </li>
             </ul>
           </nav>

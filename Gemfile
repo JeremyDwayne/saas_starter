@@ -53,6 +53,7 @@ gem "omniauth-github", "~> 2.0.0"
 gem "pay", "~> 11.1"
 gem "stripe", "~> 15.3"
 gem "receipts", "~> 2.4"
+gem "refer"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

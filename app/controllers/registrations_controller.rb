@@ -9,6 +9,7 @@ class RegistrationsController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save(context: :registration)
+      refer @user #=> Looks up cookie and attempts referral
       start_new_session_for(@user, source: "registration")
       flash[:notice] = "Welcome! Your account has been created successfully."
       redirect_to after_authentication_url

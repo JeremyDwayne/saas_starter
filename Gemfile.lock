@@ -316,6 +316,8 @@ GEM
     receipts (2.4.0)
       prawn (>= 1.3.0, < 3.0.0)
       prawn-table (~> 0.2.1)
+    refer (1.0.3)
+      rails (>= 7.1.0)
     regexp_parser (2.11.3)
     reline (0.6.2)
       io-console (~> 0.5)
@@ -470,6 +472,7 @@ DEPENDENCIES
   puma (>= 5.0)
   rails (~> 8.1.0.beta1)
   receipts (~> 2.4)
+  refer
   rubocop-rails-omakase
   selenium-webdriver
   solid_cable

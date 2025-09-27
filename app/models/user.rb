@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :omni_auth_identities, dependent: :destroy
+  has_many :user_roles, dependent: :destroy
+  has_many :roles, through: :user_roles
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
   pay_merchant
@@ -83,5 +85,41 @@ class User < ApplicationRecord
 
   def on_trial_or_subscribed?
     subscribed? || on_trial?
+  end
+
+  def has_role?(role_name)
+    roles.exists?(name: role_name.to_s.downcase)
+  end
+
+  def has_permission?(permission_name)
+    roles.joins(:permissions).exists?(permissions: { name: permission_name })
+  end
+
+  def has_permission_for?(resource, action)
+    roles.joins(:permissions).exists?(permissions: { resource: resource, action: action })
+  end
+
+  def admin?
+    has_role?(:admin)
+  end
+
+  def assign_role(role_name)
+    role = Role.find_by(name: role_name.to_s.downcase)
+    return false unless role
+
+    user_roles.find_or_create_by(role: role)
+    true
+  end
+
+  def remove_role(role_name)
+    role = Role.find_by(name: role_name.to_s.downcase)
+    return false unless role
+
+    user_roles.where(role: role).destroy_all
+    true
+  end
+
+  def role_names
+    roles.pluck(:name)
   end
 end

@@ -2,12 +2,12 @@
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
 require:
-  - ./lib/rubocop/cops/no_execute_in_migrations.rb
-  - ./lib/rubocop/cops/only_atomic_migrations.rb
+  - ./lib/cops/no_execute_in_migrations.rb
+  - ./lib/cops/only_atomic_migrations.rb
 
 AllCops:
   Exclude:
-    - 'Gemfile.lock'
+    - "Gemfile.lock"
 
 # Overwrite or add rules to create your own house style
 #

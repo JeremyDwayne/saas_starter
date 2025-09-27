@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  draw :madmin
   # Authentication routes
   get "/signin", to: "sessions#new", as: :signin
   post "/signin", to: "sessions#create"

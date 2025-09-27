@@ -79,6 +79,31 @@ class Sessions::OmniAuthsController < ApplicationController
       else
         # Existing identity, use the associated user
         user_to_sign_in = identity.user
+
+        # Handle orphaned identity (user was deleted but identity remains)
+        if user_to_sign_in.nil?
+          Rails.logger.warn "Orphaned identity found (ID: #{identity.id}), user no longer exists. Deleting identity and creating new user."
+          identity.destroy
+
+          # Create new user and identity
+          user = User.create_from_oauth(auth)
+          if user.persisted?
+            identity = OmniAuthIdentity.create!(uid: uid, provider: provider, user: user)
+            user_to_sign_in = user
+
+            # Track referral for this recreated user
+            begin
+              refer user
+              if Rails.env.development? && (referral = Refer::Referral.find_by(referee: user))
+                Rails.logger.info "OAuth referral created for recreated user: Referrer #{referral.referrer_id}, Referee #{referral.referee_id}"
+              end
+            rescue => e
+              Rails.logger.error "OAuth referral tracking failed for recreated user: #{e.message}"
+            end
+          else
+            Rails.logger.error "Failed to recreate user from orphaned identity: #{user.errors.full_messages.join(', ')}"
+          end
+        end
       end
 
       # Safety check to ensure we have a valid user

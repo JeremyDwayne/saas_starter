@@ -3,6 +3,13 @@ class Sessions::OmniAuthsController < ApplicationController
 
   def create
     auth = request.env["omniauth.auth"]
+
+    # Validate required OAuth data
+    unless auth&.dig("uid") && auth&.dig("provider") && auth&.dig("info", "email")
+      Rails.logger.error "OAuth error: Missing required auth data. Auth: #{auth.inspect}"
+      redirect_to signin_path, alert: "Authentication data incomplete. Please try again." and return
+    end
+
     uid = auth["uid"]
     provider = auth["provider"]
     redirect_path = request.env["omniauth.params"]&.dig("origin") || root_path
@@ -40,7 +47,12 @@ class Sessions::OmniAuthsController < ApplicationController
           user.signed_in_with_oauth(auth)
         else
           # New user - create from OAuth
+          Rails.logger.info "Creating new OAuth user with email: #{auth.info.email}" if Rails.env.development?
           user = User.create_from_oauth(auth)
+
+          unless user.persisted?
+            Rails.logger.error "Failed to create OAuth user: #{user.errors.full_messages.join(', ')}"
+          end
         end
 
         if user.persisted?
@@ -49,11 +61,16 @@ class Sessions::OmniAuthsController < ApplicationController
 
           # Track referral for new OAuth users only
           if is_new_user
-            refer user
+            begin
+              refer user
 
-            # Log referral creation in development
-            if Rails.env.development? && (referral = Refer::Referral.find_by(referee: user))
-              Rails.logger.info "OAuth referral created: Referrer #{referral.referrer_id}, Referee #{referral.referee_id}"
+              # Log referral creation in development
+              if Rails.env.development? && (referral = Refer::Referral.find_by(referee: user))
+                Rails.logger.info "OAuth referral created: Referrer #{referral.referrer_id}, Referee #{referral.referee_id}"
+              end
+            rescue => e
+              Rails.logger.error "OAuth referral tracking failed: #{e.message}"
+              # Continue with OAuth flow even if referral tracking fails
             end
           end
         else
@@ -62,6 +79,12 @@ class Sessions::OmniAuthsController < ApplicationController
       else
         # Existing identity, use the associated user
         user_to_sign_in = identity.user
+      end
+
+      # Safety check to ensure we have a valid user
+      if user_to_sign_in.nil?
+        Rails.logger.error "OAuth error: user_to_sign_in is nil. Identity: #{identity&.id}, Auth email: #{auth.info.email}"
+        redirect_to signin_path, alert: "Authentication error. Please try again." and return
       end
 
       start_new_session_for user_to_sign_in

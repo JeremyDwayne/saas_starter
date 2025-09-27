@@ -1,13 +1,13 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  name: MyString
-  description: MyText
-  resource: MyString
-  action: MyString
+test_permission_one:
+  name: test_permission_1
+  description: Test permission one
+  resource: test_resource_1
+  action: read
 
-two:
-  name: MyString
-  description: MyText
-  resource: MyString
-  action: MyString
+test_permission_two:
+  name: test_permission_2
+  description: Test permission two
+  resource: test_resource_2
+  action: write

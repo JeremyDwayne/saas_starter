@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  referrer: one
+  referee: one
+  subscription_id: MyString
+  amount: 1
+  status: MyString
+  earned_at: 2025-09-27 22:02:36
+  used_at: 2025-09-27 22:02:36
+  notes: MyText
+
+two:
+  referrer: two
+  referee: two
+  subscription_id: MyString
+  amount: 1
+  status: MyString
+  earned_at: 2025-09-27 22:02:36
+  used_at: 2025-09-27 22:02:36
+  notes: MyText

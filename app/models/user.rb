@@ -5,6 +5,8 @@ class User < ApplicationRecord
   has_many :omni_auth_identities, dependent: :destroy
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
+  has_many :earned_rewards, class_name: "ReferralReward", foreign_key: "referrer_id", dependent: :destroy
+  has_many :generated_rewards, class_name: "ReferralReward", foreign_key: "referee_id", dependent: :destroy
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
   pay_merchant
@@ -122,5 +124,34 @@ class User < ApplicationRecord
 
   def role_names
     roles.pluck(:name)
+  end
+
+  # Referral reward methods
+  def available_credit_balance
+    earned_rewards.available.sum(:amount)
+  end
+
+  def available_credit_balance_dollars
+    available_credit_balance / 100.0
+  end
+
+  def total_earned_credits
+    earned_rewards.sum(:amount)
+  end
+
+  def total_earned_credits_dollars
+    total_earned_credits / 100.0
+  end
+
+  def total_used_credits
+    earned_rewards.used.sum(:amount)
+  end
+
+  def total_used_credits_dollars
+    total_used_credits / 100.0
+  end
+
+  def successful_referrals_count
+    earned_rewards.where.not(status: "pending").count
   end
 end

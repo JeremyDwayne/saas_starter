@@ -88,6 +88,8 @@ namespace :madmin do
   resources :omni_auth_identities
   resources :sessions
   resources :users
+  resources :referral_rewards
+  resources :referral_configurations
   namespace :pay do
     namespace :paddle_billing do
       resources :customers

@@ -50,3 +50,14 @@ user_role.permissions = Permission.where(name: user_permissions.map { |p| p[:nam
 
 puts "Created #{Role.count} roles and #{Permission.count} permissions"
 puts "Roles: #{Role.pluck(:name).join(', ')}"
+
+puts "Seeding referral configurations..."
+
+# Create default referral configuration
+default_config = ReferralConfiguration.find_or_create_by!(name: "Default Configuration") do |config|
+  config.reward_percentage = 10.0
+  config.enabled = true
+  config.description = "Default referral reward configuration - 10% credit for successful referrals"
+end
+
+puts "Created referral configuration: #{default_config.name} (#{default_config.reward_percentage}% rewards)"

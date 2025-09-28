@@ -1,0 +1,23 @@
+🎉 Congratulations! You've earned $<%= sprintf('%.2f', @credit_amount) %> in referral credits!
+
+Hi <%= @referrer.name || @referrer.email.split('@').first %>,
+
+Great news! Someone you referred has just subscribed, and you've earned a referral credit.
+
+Referral Details:
+- Referred User: <%= @referee.name || @referee.email %>
+- Credit Amount: $<%= sprintf('%.2f', @credit_amount) %>
+- Status: Available for use
+- Date Earned: <%= @reward.earned_at.strftime("%B %d, %Y") %>
+
+Your credit will be automatically applied to your next subscription bill. You can view all your referral credits and share your referral link in your account settings.
+
+View your referral dashboard: <%= ENV['APP_URL'] || 'http://localhost:3000' %>/settings
+
+Keep sharing your referral link to earn more credits!
+
+Best regards,
+The Team
+
+---
+This credit will be automatically applied to your next subscription renewal.

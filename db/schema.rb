@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_09_27_195530) do
+ActiveRecord::Schema[8.1].define(version: 2025_09_28_020319) do
   create_table "omni_auth_identities", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "provider"
@@ -167,6 +167,36 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_27_195530) do
     t.index [ "referral_code_id" ], name: "index_refer_visits_on_referral_code_id"
   end
 
+  create_table "referral_configurations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "credit_expiry_days"
+    t.text "description"
+    t.boolean "enabled", default: true, null: false
+    t.integer "max_credits_per_referral"
+    t.string "name", default: "Default Configuration", null: false
+    t.decimal "reward_percentage", precision: 5, scale: 2, default: "10.0", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "enabled" ], name: "index_referral_configurations_on_enabled"
+  end
+
+  create_table "referral_rewards", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.integer "amount", null: false
+    t.datetime "created_at", null: false
+    t.datetime "earned_at", null: false
+    t.text "notes"
+    t.string "referee_id", null: false
+    t.string "referrer_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "subscription_id", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "used_at"
+    t.index [ "earned_at" ], name: "index_referral_rewards_on_earned_at"
+    t.index [ "referee_id" ], name: "index_referral_rewards_on_referee_id"
+    t.index [ "referrer_id" ], name: "index_referral_rewards_on_referrer_id"
+    t.index [ "status" ], name: "index_referral_rewards_on_status"
+    t.index [ "subscription_id" ], name: "index_referral_rewards_on_subscription_id"
+  end
+
   create_table "role_permissions", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "permission_id", null: false
@@ -220,6 +250,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_27_195530) do
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
+  add_foreign_key "referral_rewards", "users", column: "referee_id"
+  add_foreign_key "referral_rewards", "users", column: "referrer_id"
   add_foreign_key "role_permissions", "permissions"
   add_foreign_key "role_permissions", "roles"
   add_foreign_key "user_roles", "roles"

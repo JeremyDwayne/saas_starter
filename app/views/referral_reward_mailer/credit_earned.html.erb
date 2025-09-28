@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Referral Credit Earned</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 8px 8px 0 0; text-align: center; }
+      .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+      .amount { font-size: 2em; font-weight: bold; color: #10b981; text-align: center; margin: 20px 0; }
+      .button { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 500; }
+      .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🎉 Congratulations!</h1>
+        <p>You've earned a referral credit!</p>
+      </div>
+
+      <div class="content">
+        <p>Hi <%= @referrer.name || @referrer.email.split('@').first %>,</p>
+
+        <p>Great news! Someone you referred has just subscribed, and you've earned a referral credit:</p>
+
+        <div class="amount">$<%= sprintf('%.2f', @credit_amount) %></div>
+
+        <p><strong>Referral Details:</strong></p>
+        <ul>
+          <li><strong>Referred User:</strong> <%= @referee.name || @referee.email %></li>
+          <li><strong>Credit Amount:</strong> $<%= sprintf('%.2f', @credit_amount) %></li>
+          <li><strong>Status:</strong> Available for use</li>
+          <li><strong>Date Earned:</strong> <%= @reward.earned_at.strftime("%B %d, %Y") %></li>
+        </ul>
+
+        <p>Your credit will be automatically applied to your next subscription bill. You can view all your referral credits and share your referral link in your account settings.</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="<%= ENV['APP_URL'] || 'http://localhost:3000' %>/settings" class="button">
+            View My Referral Dashboard
+          </a>
+        </div>
+
+        <p>Keep sharing your referral link to earn more credits!</p>
+
+        <p>Best regards,<br>The Team</p>
+      </div>
+
+      <div class="footer">
+        <p>This credit will be automatically applied to your next subscription renewal.</p>
+      </div>
+    </div>
+  </body>
+</html>

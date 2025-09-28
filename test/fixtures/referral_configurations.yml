@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  reward_percentage: 9.99
+  enabled: false
+  max_credits_per_referral: 1
+  credit_expiry_days: 1
+
+two:
+  reward_percentage: 9.99
+  enabled: false
+  max_credits_per_referral: 1
+  credit_expiry_days: 1

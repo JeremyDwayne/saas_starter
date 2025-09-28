@@ -130,7 +130,7 @@
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
           <div class="mb-4 sm:mb-0">
             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">Referral Program</h3>
-            <p class="text-sm text-gray-600">Share your referral link with friends and earn <strong><%= ReferralConfiguration.current.reward_percentage_display %></strong> credit when they subscribe!</p>
+            <p class="text-sm text-gray-600">Share your referral link with friends and earn <strong><%= ReferralConfiguration.current&.reward_percentage_display || "credits" %></strong> when they subscribe!</p>
           </div>
         </div>
 

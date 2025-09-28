@@ -73,14 +73,12 @@ class ReferralConfigurationTest < ActiveSupport::TestCase
     assert_equal enabled_config, ReferralConfiguration.current
   end
 
-  test "current should return default when no enabled config exists" do
+  test "current should return nil when no enabled config exists" do
     # Disable all configs
     ReferralConfiguration.update_all(enabled: false)
 
     current = ReferralConfiguration.current
-    assert_equal 10.0, current.reward_percentage
-    assert current.enabled?
-    assert_equal "Default Configuration", current.name
+    assert_nil current
   end
 
   test "calculate_reward_amount should return correct percentage" do

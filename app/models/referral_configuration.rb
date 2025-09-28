@@ -7,11 +7,7 @@ class ReferralConfiguration < ApplicationRecord
   scope :enabled, -> { where(enabled: true) }
 
   def self.current
-    enabled.first || new(
-      reward_percentage: 10.0,
-      enabled: true,
-      name: "Default Configuration"
-    )
+    enabled.first
   end
 
   def calculate_reward_amount(subscription_amount_cents)

@@ -16,7 +16,7 @@ class ReferralRewardService
     return unless referral
 
     config = ReferralConfiguration.current
-    return unless config.enabled?
+    return unless config&.enabled?
 
     create_referral_reward(referral, config)
   end

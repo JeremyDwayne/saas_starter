@@ -35,9 +35,9 @@
         <% if authenticated? %>
           <!-- Authenticated Navigation -->
           <%= link_to "Dashboard",
-          root_path,
+          dashboard_path,
           class:
-            "text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors" %>
+            "block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors" %>
           <%= link_to "Pricing",
           pricing_path,
           class:

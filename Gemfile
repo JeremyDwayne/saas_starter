@@ -50,7 +50,7 @@ gem "omniauth-google-oauth2", "~> 1.2"
 gem "omniauth-github", "~> 2.0.0"
 
 # Payments
-gem "pay", "~> 11.1"
+gem "pay", "~> 11.2"
 gem "stripe", "~> 15.3"
 gem "receipts", "~> 2.4"
 gem "refer"

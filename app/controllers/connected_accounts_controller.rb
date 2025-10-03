@@ -1,0 +1,78 @@
+# Connected accounts controller
+# Handles Stripe Connect onboarding and account management
+class ConnectedAccountsController < ApplicationController
+  before_action :require_subscription, only: [ :create ]
+
+  # GET /connected_account/new
+  # Show onboarding information page
+  def new
+    @fee_percentage = Current.user.platform_fee_percentage
+  end
+
+  # POST /connected_account
+  # Initiate Stripe Connect account creation
+  def create
+    begin
+      Current.user.set_merchant_processor(:stripe)
+      Current.user.merchant_processor.create_account
+
+      # Generate account link for onboarding
+      account_link = Current.user.merchant_processor.account_link(
+        refresh_url: refresh_connected_account_url,
+        return_url: return_connected_account_url
+      )
+
+      redirect_to account_link, allow_other_host: true, status: :see_other
+    rescue => e
+      Rails.logger.error "Failed to create connected account: #{e.message}"
+      redirect_to new_connected_account_path, alert: "Failed to start onboarding. Please try again."
+    end
+  end
+
+  # GET /connected_account/return
+  # Handle successful onboarding return
+  def return
+    if Current.user.merchant_onboarding_complete?
+      flash[:notice] = "Your account is connected! You can now accept payments."
+    else
+      flash[:warning] = "Onboarding incomplete. Please complete all required steps."
+    end
+    redirect_to settings_path
+  end
+
+  # GET /connected_account/refresh
+  # Regenerate onboarding link if user needs to complete setup
+  def refresh
+    begin
+      account_link = Current.user.merchant_processor.account_link(
+        refresh_url: refresh_connected_account_url,
+        return_url: return_connected_account_url
+      )
+      redirect_to account_link, allow_other_host: true, status: :see_other
+    rescue => e
+      Rails.logger.error "Failed to refresh account link: #{e.message}"
+      redirect_to settings_path, alert: "Failed to refresh onboarding. Please try again."
+    end
+  end
+
+  # GET /connected_account/dashboard
+  # Redirect to Stripe Express Dashboard
+  def dashboard
+    begin
+      login_link = Current.user.merchant_processor.login_link
+      redirect_to login_link, allow_other_host: true, status: :see_other
+    rescue => e
+      Rails.logger.error "Failed to generate dashboard link: #{e.message}"
+      redirect_to settings_path, alert: "Failed to access dashboard. Please try again."
+    end
+  end
+
+  private
+
+  # Ensure user has active subscription before connecting account
+  def require_subscription
+    unless Current.user.on_trial_or_subscribed?
+      redirect_to pricing_path, alert: "You need an active subscription to connect your account."
+    end
+  end
+end

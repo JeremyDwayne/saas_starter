@@ -79,9 +79,9 @@
         "dependencies": [
           "5"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
-        "updatedAt": "2025-10-03T22:30:46.193Z"
+        "updatedAt": "2025-10-03T23:07:14.864Z"
       },
       {
         "id": "7",
@@ -93,8 +93,9 @@
         "dependencies": [
           "6"
         ],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T23:08:36.923Z"
       },
       {
         "id": "8",
@@ -138,9 +139,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-03T22:30:46.194Z",
+      "lastModified": "2025-10-03T23:08:36.924Z",
       "taskCount": 10,
-      "completedCount": 5,
+      "completedCount": 7,
       "tags": [
         "master"
       ]

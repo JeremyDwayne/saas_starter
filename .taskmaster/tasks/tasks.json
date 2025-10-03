@@ -1,0 +1,149 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Create Platform Fee Configuration Migration and Model",
+        "description": "Create database migration and model for platform fee configurations with subscription tier-based fee structures",
+        "details": "Create CreatePlatformFeeConfigurations migration with fields: subscription_tier (string), fee_percentage (decimal 5,2), minimum_fee_cents (integer), active (boolean). Create PlatformFeeConfiguration model with validations for tier uniqueness, fee percentage bounds (0-100%), and scope methods for active configurations. Include VALID_TIERS constant with personal, professional, enterprise, none values. Implement fee_for_tier class method and calculate_application_fee instance method.",
+        "testStrategy": "Unit tests for model validations, fee calculation logic, tier lookup methods, and edge cases like minimum fee enforcement. Test invalid tier names and percentage bounds.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:23:29.186Z"
+      },
+      {
+        "id": "2",
+        "title": "Create Custom Platform Fee Migration and Model",
+        "description": "Create database migration and model for user-specific custom fee overrides with expiration support",
+        "details": "Create CreateCustomPlatformFees migration with fields: user_id (foreign key), fee_percentage (decimal 5,2), minimum_fee_cents (integer), notes (string), expires_at (date). Create CustomPlatformFee model with belongs_to :user association, user_id uniqueness validation, active scope for non-expired fees, and calculate_application_fee method matching PlatformFeeConfiguration interface.",
+        "testStrategy": "Unit tests for user association, expiration logic, fee calculation, and validation constraints. Test active scope with various expiration dates.",
+        "priority": "high",
+        "dependencies": [
+          "1"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:26:19.907Z"
+      },
+      {
+        "id": "3",
+        "title": "Create Platform Transaction Migration and Model",
+        "description": "Create database migration and model to track all platform charges and application fees",
+        "details": "Create CreatePlatformTransactions migration with fields: merchant_id (foreign key to users), stripe_charge_id (unique), charge_amount_cents (integer), application_fee_cents (integer), fee_percentage_applied (decimal 5,2), customer_email, description, metadata (json), status (enum: succeeded/refunded/partially_refunded). Create PlatformTransaction model with belongs_to :merchant association, validations, scopes for status filtering, and convenience methods for dollar amounts and net calculations.",
+        "testStrategy": "Unit tests for merchant association, charge amount validations, status transitions, dollar conversion methods, and metadata handling. Test scope methods and net amount calculations.",
+        "priority": "high",
+        "dependencies": [
+          "2"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:28:18.542Z"
+      },
+      {
+        "id": "4",
+        "title": "Enhance User Model with Platform Fee Methods",
+        "description": "Add platform fee calculation methods and merchant payment capabilities to User model",
+        "details": "Add methods to User model: platform_fee_percentage (checks custom fee first, falls back to tier), calculate_platform_fee(amount_cents), current_subscription_tier (extracts from subscription name), merchant_onboarding_complete?, can_accept_payments?. Add associations: has_one :custom_platform_fee, has_many :platform_transactions. The pay_merchant association already exists from line 12 in user.rb.",
+        "testStrategy": "Unit tests for fee calculation precedence (custom vs tier), subscription tier extraction, merchant status checks, and association functionality. Test edge cases like missing subscriptions and incomplete onboarding.",
+        "priority": "high",
+        "dependencies": [
+          "3"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:29:27.381Z"
+      },
+      {
+        "id": "5",
+        "title": "Create Fee Calculation Service",
+        "description": "Build service object for centralized platform fee calculations with detailed breakdown",
+        "details": "Create FeeCalculationService with class method calculate_for_user(user, amount_cents) returning hash with amount_cents, fee_cents, fee_percentage, net_amount_cents, and fee_source (custom/tier/default). Service should handle all fee calculation logic and provide consistent interface for controllers and other services.",
+        "testStrategy": "Unit tests for fee calculations across different user types (custom fee, tier-based, no subscription), amount scenarios, and return value structure. Test fee source attribution accuracy.",
+        "priority": "medium",
+        "dependencies": [
+          "4"
+        ],
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:30:18.419Z"
+      },
+      {
+        "id": "6",
+        "title": "Create Platform Charge Service",
+        "description": "Build service object for creating Stripe charges with application fees using Direct Charges model",
+        "details": "Create PlatformChargeService with create_charge class method accepting merchant, amount_cents, customer_email, description, metadata parameters. Service validates merchant onboarding and subscription status, calculates fees via FeeCalculationService, creates Stripe charge on connected account with application_fee_amount, and records transaction in PlatformTransaction. Include custom error classes for different failure scenarios.",
+        "testStrategy": "Unit tests for merchant validation, Stripe API integration (mocked), fee calculation integration, transaction recording, and error handling for various failure scenarios. Integration tests with test Stripe accounts.",
+        "priority": "high",
+        "dependencies": [
+          "5"
+        ],
+        "status": "in-progress",
+        "subtasks": [],
+        "updatedAt": "2025-10-03T22:30:46.193Z"
+      },
+      {
+        "id": "7",
+        "title": "Create Connected Accounts Controller",
+        "description": "Build controller for Stripe Connect onboarding flow with account management",
+        "details": "Create ConnectedAccountsController with actions: new (show onboarding info), create (initiate Stripe Connect), return (handle onboarding completion), refresh (regenerate onboarding link), dashboard (redirect to Stripe Express Dashboard). Include subscription requirement check and proper error handling with user-friendly messages.",
+        "testStrategy": "Controller tests for each action, subscription requirement enforcement, Stripe Connect flow handling, and redirect behaviors. System tests for complete onboarding workflow.",
+        "priority": "medium",
+        "dependencies": [
+          "6"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "8",
+        "title": "Create Platform Charges Controller",
+        "description": "Build controller for creating and managing platform charges with transaction history",
+        "details": "Create PlatformChargesController with actions: new (charge form with fee preview), create (process charge via PlatformChargeService), index (transaction history with pagination and summary stats), show (individual transaction details). Include merchant onboarding requirement and proper error handling for charge failures.",
+        "testStrategy": "Controller tests for charge creation, fee preview calculations, transaction listing, authorization checks, and error handling. System tests for complete charge workflow and UI interactions.",
+        "priority": "medium",
+        "dependencies": [
+          "7"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "9",
+        "title": "Create Views and UI Components",
+        "description": "Build all frontend views for Stripe Connect onboarding, charge creation, and transaction management",
+        "details": "Create views: connected_accounts/new.html.erb (onboarding page with fee display), platform_charges/new.html.erb (charge form with real-time fee calculation), platform_charges/index.html.erb (transaction history with summary cards), settings enhancement for connected account status. Use Tailwind CSS for styling and include Stimulus controllers for dynamic fee calculations.",
+        "testStrategy": "System tests for UI workflows, fee calculation display, form submissions, and responsive design. Test JavaScript interactions for dynamic fee preview and error state handling.",
+        "priority": "medium",
+        "dependencies": [
+          "8"
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "10",
+        "title": "Create Webhook Job and Configuration",
+        "description": "Implement webhook processing for Stripe Connect events and configure routes",
+        "details": "Create ConnectedAccountWebhookJob to handle account.updated, charge.succeeded, and charge.refunded events. Configure Pay gem webhook subscriptions in initializer. Add routes for connected accounts and platform charges. Create Madmin resources for admin management of fee configurations and transactions. Implement seed data for default fee structures.",
+        "testStrategy": "Unit tests for webhook event processing, Pay gem integration, route accessibility, and admin interface functionality. Integration tests with Stripe webhook events and end-to-end workflow testing.",
+        "priority": "medium",
+        "dependencies": [
+          "9"
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2025-10-03T22:30:46.194Z",
+      "taskCount": 10,
+      "completedCount": 5,
+      "tags": [
+        "master"
+      ]
+    }
+  }
+}

@@ -7,6 +7,8 @@ class User < ApplicationRecord
   has_many :roles, through: :user_roles
   has_many :earned_rewards, class_name: "ReferralReward", foreign_key: "referrer_id", dependent: :destroy
   has_many :generated_rewards, class_name: "ReferralReward", foreign_key: "referee_id", dependent: :destroy
+  has_one :custom_platform_fee, dependent: :destroy
+  has_many :platform_transactions, foreign_key: "merchant_id", dependent: :destroy
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
   pay_merchant
@@ -153,5 +155,58 @@ class User < ApplicationRecord
 
   def successful_referrals_count
     earned_rewards.where.not(status: "pending").count
+  end
+
+  # Platform fee methods
+  def platform_fee_percentage
+    # Check for custom fee first
+    custom_fee = custom_platform_fee
+    return custom_fee.fee_percentage if custom_fee&.active?
+
+    # Fall back to tier-based fee
+    tier = current_subscription_tier
+    config = PlatformFeeConfiguration.fee_for_tier(tier)
+    config&.fee_percentage || default_platform_fee_percentage
+  end
+
+  def calculate_platform_fee(amount_cents)
+    custom_fee = custom_platform_fee
+    if custom_fee&.active?
+      return custom_fee.calculate_application_fee(amount_cents)
+    end
+
+    tier = current_subscription_tier
+    config = PlatformFeeConfiguration.fee_for_tier(tier)
+
+    if config
+      config.calculate_application_fee(amount_cents)
+    else
+      # Default to highest fee if no subscription
+      (amount_cents * (default_platform_fee_percentage / 100.0)).round
+    end
+  end
+
+  def current_subscription_tier
+    return "none" unless subscription
+
+    # Extract tier from subscription metadata or name
+    subscription.name&.downcase || "none"
+  end
+
+  def merchant_onboarding_complete?
+    return false unless merchant_processor
+    merchant_processor.onboarding_complete?
+  rescue
+    false
+  end
+
+  def can_accept_payments?
+    merchant_onboarding_complete? && on_trial_or_subscribed?
+  end
+
+  private
+
+  def default_platform_fee_percentage
+    7.0 # Highest fee for users without subscription
   end
 end

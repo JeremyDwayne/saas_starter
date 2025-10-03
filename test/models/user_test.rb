@@ -125,4 +125,107 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal 2, user.successful_referrals_count
   end
+
+  # Platform fee tests
+  test "platform_fee_percentage should use custom fee when active" do
+    user = User.create!(email_address: "test5@example.com", password: "password123")
+
+    CustomPlatformFee.create!(
+      user: user,
+      fee_percentage: 2.5,
+      expires_at: Date.tomorrow
+    )
+
+    assert_equal 2.5, user.platform_fee_percentage
+  end
+
+  test "platform_fee_percentage should fall back to tier fee when no custom fee" do
+    user = User.create!(email_address: "test6@example.com", password: "password123")
+
+    PlatformFeeConfiguration.create!(
+      subscription_tier: "none",
+      fee_percentage: 7.0,
+      active: true
+    )
+
+    assert_equal 7.0, user.platform_fee_percentage
+  end
+
+  test "platform_fee_percentage should use default when no config exists" do
+    user = User.create!(email_address: "test7@example.com", password: "password123")
+    assert_equal 7.0, user.platform_fee_percentage
+  end
+
+  test "calculate_platform_fee should use custom fee calculation when active" do
+    user = User.create!(email_address: "test8@example.com", password: "password123")
+
+    CustomPlatformFee.create!(
+      user: user,
+      fee_percentage: 3.0
+    )
+
+    fee = user.calculate_platform_fee(10000) # $100
+    assert_equal 300, fee # $3.00
+  end
+
+  test "calculate_platform_fee should use tier fee when no custom fee" do
+    user = User.create!(email_address: "test9@example.com", password: "password123")
+
+    PlatformFeeConfiguration.create!(
+      subscription_tier: "none",
+      fee_percentage: 5.0,
+      active: true
+    )
+
+    fee = user.calculate_platform_fee(10000)
+    assert_equal 500, fee
+  end
+
+  test "calculate_platform_fee should use default percentage when no config" do
+    user = User.create!(email_address: "test10@example.com", password: "password123")
+
+    fee = user.calculate_platform_fee(10000)
+    assert_equal 700, fee # 7% default
+  end
+
+  test "current_subscription_tier should return none when no subscription" do
+    user = User.create!(email_address: "test11@example.com", password: "password123")
+    assert_equal "none", user.current_subscription_tier
+  end
+
+  test "merchant_onboarding_complete? should return false when no merchant processor" do
+    user = User.create!(email_address: "test12@example.com", password: "password123")
+    assert_not user.merchant_onboarding_complete?
+  end
+
+  test "can_accept_payments? should return false when not onboarded" do
+    user = User.create!(email_address: "test13@example.com", password: "password123")
+    assert_not user.can_accept_payments?
+  end
+
+  test "should have custom_platform_fee association" do
+    user = User.create!(email_address: "test14@example.com", password: "password123")
+
+    custom_fee = CustomPlatformFee.create!(
+      user: user,
+      fee_percentage: 3.5
+    )
+
+    assert_equal custom_fee, user.custom_platform_fee
+  end
+
+  test "should have platform_transactions association" do
+    user = User.create!(email_address: "test15@example.com", password: "password123")
+
+    transaction = PlatformTransaction.create!(
+      merchant: user,
+      stripe_charge_id: "ch_test_assoc",
+      charge_amount_cents: 5000,
+      application_fee_cents: 250,
+      fee_percentage_applied: 5.0,
+      status: "succeeded"
+    )
+
+    assert_includes user.platform_transactions, transaction
+  end
 end

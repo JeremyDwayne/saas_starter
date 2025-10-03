@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_09_28_020319) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_03_222629) do
+  create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "expires_at"
+    t.decimal "fee_percentage", precision: 5, scale: 2, null: false
+    t.integer "minimum_fee_cents"
+    t.string "notes"
+    t.datetime "updated_at", null: false
+    t.string "user_id", null: false
+    t.index [ "expires_at" ], name: "index_custom_platform_fees_on_expires_at"
+    t.index [ "user_id" ], name: "index_custom_platform_fees_on_user_id", unique: true
+  end
+
   create_table "omni_auth_identities", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "provider"
@@ -130,6 +142,35 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_28_020319) do
     t.index [ "resource", "action" ], name: "index_permissions_on_resource_and_action", unique: true
   end
 
+  create_table "platform_fee_configurations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.decimal "fee_percentage", precision: 5, scale: 2, null: false
+    t.integer "minimum_fee_cents"
+    t.string "subscription_tier", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "active" ], name: "index_platform_fee_configurations_on_active"
+    t.index [ "subscription_tier" ], name: "index_platform_fee_configurations_on_subscription_tier", unique: true
+  end
+
+  create_table "platform_transactions", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.integer "application_fee_cents", null: false
+    t.integer "charge_amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "customer_email"
+    t.string "description"
+    t.decimal "fee_percentage_applied", precision: 5, scale: 2
+    t.string "merchant_id", null: false
+    t.json "metadata"
+    t.string "status", default: "succeeded"
+    t.string "stripe_charge_id", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "created_at" ], name: "index_platform_transactions_on_created_at"
+    t.index [ "merchant_id" ], name: "index_platform_transactions_on_merchant_id"
+    t.index [ "status" ], name: "index_platform_transactions_on_status"
+    t.index [ "stripe_charge_id" ], name: "index_platform_transactions_on_stripe_charge_id", unique: true
+  end
+
   create_table "refer_referral_codes", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.string "code", null: false
     t.datetime "created_at", null: false
@@ -245,10 +286,12 @@ ActiveRecord::Schema[8.1].define(version: 2025_09_28_020319) do
     t.index [ "email_address" ], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "custom_platform_fees", "users"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"
   add_foreign_key "pay_subscriptions", "pay_customers", column: "customer_id"
+  add_foreign_key "platform_transactions", "users", column: "merchant_id"
   add_foreign_key "refer_visits", "refer_referral_codes", column: "referral_code_id"
   add_foreign_key "referral_rewards", "users", column: "referee_id"
   add_foreign_key "referral_rewards", "users", column: "referrer_id"

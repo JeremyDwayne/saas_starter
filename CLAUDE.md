@@ -191,3 +191,7 @@ After cloning this repository, developers must run:
 
 The pre-commit hook ensures consistent code style across all commits without manual intervention.
 - all tests must pass before committing changes `bin/rails test`
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

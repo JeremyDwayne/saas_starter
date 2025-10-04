@@ -28,20 +28,17 @@ export default class extends Controller {
   }
 
   close(event) {
-    // If called from close button, just close
-    if (!event || event.type !== "click") {
-      this.containerTarget.classList.add("hidden")
-      document.removeEventListener("click", this.boundClose)
-      return
+    // If called from document click listener, check if we should actually close
+    if (event && event.currentTarget === document) {
+      // Don't close if clicking inside the white sidebar content
+      const sidebarContent = this.containerTarget.querySelector('.bg-white')
+      if (sidebarContent && sidebarContent.contains(event.target)) {
+        return
+      }
     }
 
-    // For document clicks, check if clicking backdrop or outside
-    const clickedBackdrop = event.target.hasAttribute('data-mobile-sidebar-backdrop')
-    const clickedOutside = !this.element.contains(event.target)
-
-    if (clickedBackdrop || clickedOutside) {
-      this.containerTarget.classList.add("hidden")
-      document.removeEventListener("click", this.boundClose)
-    }
+    // Close and cleanup
+    this.containerTarget.classList.add("hidden")
+    document.removeEventListener("click", this.boundClose)
   }
 }

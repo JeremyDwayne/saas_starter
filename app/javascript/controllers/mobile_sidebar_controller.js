@@ -4,14 +4,17 @@ export default class extends Controller {
   static targets = ["container"]
 
   connect() {
-    // Listen for open event from navbar trigger
+    // Listen for open and close events from navbar trigger
     this.boundOpen = this.open.bind(this)
     this.boundClose = this.close.bind(this)
+    this.boundHandleClose = this.handleClose.bind(this)
     window.addEventListener("mobile-sidebar:open", this.boundOpen)
+    window.addEventListener("mobile-sidebar:close", this.boundHandleClose)
   }
 
   disconnect() {
     window.removeEventListener("mobile-sidebar:open", this.boundOpen)
+    window.removeEventListener("mobile-sidebar:close", this.boundHandleClose)
     document.removeEventListener("click", this.boundClose)
   }
 
@@ -33,6 +36,10 @@ export default class extends Controller {
         document.addEventListener("click", this.boundClose)
       })
     })
+  }
+
+  handleClose() {
+    this.close()
   }
 
   close(event) {
@@ -58,5 +65,8 @@ export default class extends Controller {
 
     // Remove click listener
     document.removeEventListener("click", this.boundClose)
+
+    // Notify trigger to reset icons
+    window.dispatchEvent(new CustomEvent("mobile-sidebar:closed"))
   }
 }

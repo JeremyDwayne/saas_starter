@@ -12,10 +12,15 @@
             type="button"
             class="-m-2.5 p-2.5 text-gray-700 lg:hidden mr-4"
             data-controller="mobile-sidebar-trigger"
-            data-action="click->mobile-sidebar-trigger#open"
+            data-action="click->mobile-sidebar-trigger#toggle"
           >
-            <span class="sr-only">Open sidebar</span>
-            <%= icon 'menu', class: 'h-6 w-6' %>
+            <span class="sr-only">Toggle sidebar</span>
+            <span data-mobile-sidebar-trigger-target="openIcon">
+              <%= icon 'menu', class: 'h-6 w-6' %>
+            </span>
+            <span data-mobile-sidebar-trigger-target="closeIcon" class="hidden">
+              <%= icon 'close', class: 'h-6 w-6' %>
+            </span>
           </button>
         <% end %>
         <%= link_to root_path, class: "flex items-center space-x-2" do %>

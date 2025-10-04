@@ -32,7 +32,8 @@ export default class extends Controller {
 
   update() {
     if (this.openValue) {
-      // Show backdrop
+      // Show panel and backdrop
+      this.panelTarget.classList.remove("hidden")
       this.backdropTarget.classList.remove("hidden")
 
       // Show and animate sidebar
@@ -48,9 +49,10 @@ export default class extends Controller {
       this.sidebarTarget.classList.remove("translate-x-0")
       this.sidebarTarget.classList.add("-translate-x-full")
 
-      // Hide backdrop after animation
+      // Hide backdrop and panel after animation
       setTimeout(() => {
         this.backdropTarget.classList.add("hidden")
+        this.panelTarget.classList.add("hidden")
       }, 300)
 
       // Restore body scroll

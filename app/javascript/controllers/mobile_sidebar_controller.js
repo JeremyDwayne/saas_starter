@@ -16,10 +16,18 @@ export default class extends Controller {
   }
 
   open(event) {
+    const sidebar = this.containerTarget.querySelector('[data-sidebar-panel]')
+
     // Show the container
     this.containerTarget.classList.remove("hidden")
 
-    // Add outside click listener on next tick to avoid immediate close
+    // Slide in the sidebar
+    requestAnimationFrame(() => {
+      sidebar.classList.remove("-translate-x-full")
+      sidebar.classList.add("translate-x-0")
+    })
+
+    // Add outside click listener after animation starts
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         document.addEventListener("click", this.boundClose)
@@ -37,8 +45,18 @@ export default class extends Controller {
       }
     }
 
-    // Close and cleanup
-    this.containerTarget.classList.add("hidden")
+    const sidebar = this.containerTarget.querySelector('[data-sidebar-panel]')
+
+    // Slide out the sidebar
+    sidebar.classList.remove("translate-x-0")
+    sidebar.classList.add("-translate-x-full")
+
+    // Hide container after animation
+    setTimeout(() => {
+      this.containerTarget.classList.add("hidden")
+    }, 300)
+
+    // Remove click listener
     document.removeEventListener("click", this.boundClose)
   }
 }

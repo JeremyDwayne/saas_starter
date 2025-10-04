@@ -19,6 +19,11 @@
   - Subscription management with trial periods
   - Automated billing and invoice generation
   - PDF receipt generation
+  - **Stripe Connect for marketplace payments**
+    - Direct charges to connected accounts
+    - Subscription-tiered platform fees
+    - Custom fee overrides for enterprise customers
+    - Real-time fee calculations
 
 - **🎁 Referral System**
   - Automatic referral tracking with unique codes
@@ -35,6 +40,8 @@
   - Madmin-powered admin interface
   - User, session, and subscription management
   - Referral reward tracking
+  - Platform fee configuration management
+  - Transaction and merchant account oversight
 
 - **🔧 Modern Rails Stack**
   - Rails 8.1 with SQLite database
@@ -146,18 +153,26 @@ bin/rails test:system
 │   │   ├── sessions_controller.rb     # Login/logout
 │   │   ├── passwords_controller.rb    # Password reset
 │   │   ├── subscriptions_controller.rb # Payment flows
-│   │   └── settings_controller.rb     # User settings
+│   │   ├── settings_controller.rb     # User settings
+│   │   ├── connected_accounts_controller.rb # Stripe Connect onboarding
+│   │   └── platform_charges_controller.rb   # Marketplace payments
 │   ├── models/
 │   │   ├── current.rb                 # Request-scoped data
 │   │   ├── user.rb                    # User model
 │   │   ├── session.rb                 # Session tracking
-│   │   └── role.rb                    # RBAC roles
+│   │   ├── role.rb                    # RBAC roles
+│   │   ├── platform_fee_configuration.rb # Tier-based fees
+│   │   ├── custom_platform_fee.rb     # User-specific fees
+│   │   └── platform_transaction.rb    # Payment transactions
 │   ├── services/
 │   │   ├── referral_reward_service.rb # Reward processing
-│   │   └── credit_application_service.rb # Credit application
+│   │   ├── credit_application_service.rb # Credit application
+│   │   ├── fee_calculation_service.rb # Platform fee calculations
+│   │   └── platform_charge_service.rb # Stripe Connect charges
 │   ├── jobs/
 │   │   ├── referral_reward_webhook_job.rb
-│   │   └── credit_application_webhook_job.rb
+│   │   ├── credit_application_webhook_job.rb
+│   │   └── connected_account_webhook_job.rb
 │   └── views/
 ├── config/
 │   ├── initializers/
@@ -250,6 +265,51 @@ config.max_credit_per_referral # Maximum credit per referral
 config.credit_expiry_days     # Days until credits expire
 ```
 
+### Stripe Connect (Marketplace Payments)
+
+Enable users to accept payments directly from their customers with subscription-tiered platform fees:
+
+```ruby
+# Check if user can accept payments
+user.merchant_onboarding_complete?  # => true/false
+user.can_accept_payments?           # => true/false
+
+# Get platform fee percentage
+user.platform_fee_percentage        # => 5.0 (percentage)
+
+# Calculate fees for a charge
+fee_calculation = FeeCalculationService.calculate_for_user(user, 10000)
+# => {
+#   amount_cents: 10000,
+#   fee_cents: 500,
+#   fee_percentage: 5.0,
+#   net_amount_cents: 9500,
+#   fee_source: "tier"  # or "custom" or "default"
+# }
+
+# Create a charge on a connected account
+result = PlatformChargeService.create_charge(
+  merchant: user,
+  amount_cents: 10000,
+  customer_email: "customer@example.com",
+  description: "Product purchase",
+  metadata: { order_id: "123" }
+)
+```
+
+**Platform Fee Tiers** (configurable in admin):
+- Personal: 7% (default for users without subscription)
+- Professional: 5%
+- Enterprise: 3%
+- Custom: Negotiated rates for specific users
+
+**Features:**
+- Direct charges - customers see merchant's business name
+- Automatic fee calculation based on subscription tier
+- Transaction history and reporting
+- Stripe Express Dashboard access for merchants
+- Webhook handling for account updates and refunds
+
 ### Migration Safety
 
 The application includes automatic detection of unsafe migrations on large tables:
@@ -330,6 +390,9 @@ Access the admin dashboard at `/madmin` (requires admin role):
 - View subscription details
 - Track referral rewards
 - Monitor OAuth identities
+- Configure platform fee tiers
+- Manage custom fee overrides
+- View and analyze platform transactions
 
 ## 🔧 Development Commands
 

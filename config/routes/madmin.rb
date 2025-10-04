@@ -90,6 +90,9 @@ namespace :madmin do
   resources :users
   resources :referral_rewards
   resources :referral_configurations
+  resources :platform_fee_configurations
+  resources :custom_platform_fees
+  resources :platform_transactions
   namespace :pay do
     namespace :paddle_billing do
       resources :customers

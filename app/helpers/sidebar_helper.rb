@@ -14,6 +14,16 @@ module SidebarHelper
         active: current_page?(settings_path)
       }
     ].tap do |items|
+      # Add transactions link if user can accept payments or has onboarding started
+      if Current.user&.merchant_processor.present?
+        items.insert(1, {
+          name: "Transactions",
+          path: charges_path,
+          icon: "chart-bar",
+          active: current_page?(charges_path) || request.path.start_with?("/charges")
+        })
+      end
+
       # Add billing link only if user is subscribed
       if Current.user&.subscribed?
         items << {

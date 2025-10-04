@@ -15,28 +15,33 @@ export default class extends Controller {
     document.removeEventListener("click", this.boundClose)
   }
 
-  open() {
+  open(event) {
     // Show the container
     this.containerTarget.classList.remove("hidden")
 
-    // Add outside click listener after a brief delay to avoid immediate close
-    setTimeout(() => {
-      document.addEventListener("click", this.boundClose)
-    }, 100)
+    // Add outside click listener on next tick to avoid immediate close
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.addEventListener("click", this.boundClose)
+      })
+    })
   }
 
   close(event) {
-    // If event exists and click is inside container (not backdrop), don't close
-    if (event && this.containerTarget.contains(event.target)) {
-      const isBackdrop = event.target === this.containerTarget ||
-                        event.target.closest('[data-mobile-sidebar-backdrop]')
-      if (!isBackdrop) return
+    // If called from close button, just close
+    if (!event || event.type !== "click") {
+      this.containerTarget.classList.add("hidden")
+      document.removeEventListener("click", this.boundClose)
+      return
     }
 
-    // Hide the container
-    this.containerTarget.classList.add("hidden")
+    // For document clicks, check if clicking backdrop or outside
+    const clickedBackdrop = event.target.hasAttribute('data-mobile-sidebar-backdrop')
+    const clickedOutside = !this.element.contains(event.target)
 
-    // Remove outside click listener
-    document.removeEventListener("click", this.boundClose)
+    if (clickedBackdrop || clickedOutside) {
+      this.containerTarget.classList.add("hidden")
+      document.removeEventListener("click", this.boundClose)
+    }
   }
 }

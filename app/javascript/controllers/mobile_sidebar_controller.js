@@ -1,74 +1,42 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["backdrop", "panel", "sidebar"]
-  static values = { open: Boolean }
+  static targets = ["container"]
 
   connect() {
-    this.openValue = false
     // Listen for open event from navbar trigger
-    this.handleOpen = this.open.bind(this)
-    window.addEventListener("mobile-sidebar:open", this.handleOpen)
+    this.boundOpen = this.open.bind(this)
+    this.boundClose = this.close.bind(this)
+    window.addEventListener("mobile-sidebar:open", this.boundOpen)
   }
 
   disconnect() {
-    window.removeEventListener("mobile-sidebar:open", this.handleOpen)
+    window.removeEventListener("mobile-sidebar:open", this.boundOpen)
+    document.removeEventListener("click", this.boundClose)
   }
 
   open() {
-    this.openValue = true
-    this.update()
+    // Show the container
+    this.containerTarget.classList.remove("hidden")
+
+    // Add outside click listener after a brief delay to avoid immediate close
+    setTimeout(() => {
+      document.addEventListener("click", this.boundClose)
+    }, 100)
   }
 
-  close() {
-    this.openValue = false
-    this.update()
-  }
-
-  toggle() {
-    this.openValue = !this.openValue
-    this.update()
-  }
-
-  update() {
-    if (this.openValue) {
-      // Show panel and backdrop
-      this.panelTarget.classList.remove("hidden")
-      this.backdropTarget.classList.remove("hidden")
-
-      // Show and animate sidebar
-      requestAnimationFrame(() => {
-        this.sidebarTarget.classList.remove("-translate-x-full")
-        this.sidebarTarget.classList.add("translate-x-0")
-      })
-
-      // Prevent body scroll
-      document.body.style.overflow = "hidden"
-    } else {
-      // Hide sidebar
-      this.sidebarTarget.classList.remove("translate-x-0")
-      this.sidebarTarget.classList.add("-translate-x-full")
-
-      // Hide backdrop and panel after animation
-      setTimeout(() => {
-        this.backdropTarget.classList.add("hidden")
-        this.panelTarget.classList.add("hidden")
-      }, 300)
-
-      // Restore body scroll
-      document.body.style.overflow = ""
+  close(event) {
+    // If event exists and click is inside container (not backdrop), don't close
+    if (event && this.containerTarget.contains(event.target)) {
+      const isBackdrop = event.target === this.containerTarget ||
+                        event.target.closest('[data-mobile-sidebar-backdrop]')
+      if (!isBackdrop) return
     }
-  }
 
-  // Close sidebar when clicking backdrop
-  backdropClicked(event) {
-    this.close()
-  }
+    // Hide the container
+    this.containerTarget.classList.add("hidden")
 
-  // Close sidebar when clicking outside the sidebar panel
-  panelClicked(event) {
-    if (event.target === this.panelTarget) {
-      this.close()
-    }
+    // Remove outside click listener
+    document.removeEventListener("click", this.boundClose)
   }
 }

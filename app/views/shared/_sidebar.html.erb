@@ -52,18 +52,14 @@
 </div>
 
 <!-- Mobile sidebar -->
-<div class="lg:hidden">
-  <div class="relative z-40 lg:hidden" role="dialog" aria-modal="true" data-controller="mobile-sidebar" data-mobile-sidebar-open-value="false">
+<div class="lg:hidden" data-controller="mobile-sidebar">
+  <div class="relative z-40 lg:hidden hidden" role="dialog" aria-modal="true" data-mobile-sidebar-target="container">
     <!-- Off-canvas menu backdrop -->
-    <div
-      data-mobile-sidebar-target="backdrop"
-      data-action="click->mobile-sidebar#close"
-      class="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear hidden"
-    ></div>
+    <div data-mobile-sidebar-backdrop class="fixed inset-0 bg-gray-900/80"></div>
 
     <!-- Off-canvas menu -->
-    <div class="fixed inset-0 flex hidden" data-mobile-sidebar-target="panel" data-action="click->mobile-sidebar#panelClicked">
-      <div class="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out -translate-x-full" data-mobile-sidebar-target="sidebar">
+    <div class="fixed inset-0 flex">
+      <div class="relative mr-16 flex w-full max-w-xs flex-1">
         <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
           <button
             type="button"

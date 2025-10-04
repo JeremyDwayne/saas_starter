@@ -61,3 +61,48 @@ default_config = ReferralConfiguration.find_or_create_by!(name: "Default Configu
 end
 
 puts "Created referral configuration: #{default_config.name} (#{default_config.reward_percentage}% rewards)"
+
+puts "Seeding platform fee configurations..."
+
+# Create platform fee configurations for each subscription tier
+fee_configs = [
+  {
+    subscription_tier: "personal",
+    fee_percentage: 7.0,
+    minimum_fee_cents: 50,
+    active: true,
+    description: "Personal plan - highest fee percentage"
+  },
+  {
+    subscription_tier: "professional",
+    fee_percentage: 5.0,
+    minimum_fee_cents: 50,
+    active: true,
+    description: "Professional plan - medium fee percentage"
+  },
+  {
+    subscription_tier: "enterprise",
+    fee_percentage: 3.0,
+    minimum_fee_cents: 50,
+    active: true,
+    description: "Enterprise plan - lowest fee percentage"
+  },
+  {
+    subscription_tier: "none",
+    fee_percentage: 7.0,
+    minimum_fee_cents: 50,
+    active: true,
+    description: "No subscription - default fee percentage"
+  }
+]
+
+fee_configs.each do |config_data|
+  PlatformFeeConfiguration.find_or_create_by!(subscription_tier: config_data[:subscription_tier]) do |config|
+    config.fee_percentage = config_data[:fee_percentage]
+    config.minimum_fee_cents = config_data[:minimum_fee_cents]
+    config.active = config_data[:active]
+  end
+end
+
+puts "Created #{PlatformFeeConfiguration.count} platform fee configurations"
+puts "Fee tiers: #{PlatformFeeConfiguration.pluck(:subscription_tier, :fee_percentage).map { |t, f| "#{t}: #{f}%" }.join(', ')}"

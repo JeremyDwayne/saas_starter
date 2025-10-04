@@ -60,8 +60,15 @@ export default class extends Controller {
     }
   }
 
-  // Close sidebar when clicking outside or on links
-  backdropClicked() {
+  // Close sidebar when clicking backdrop
+  backdropClicked(event) {
     this.close()
+  }
+
+  // Close sidebar when clicking outside the sidebar panel
+  panelClicked(event) {
+    if (event.target === this.panelTarget) {
+      this.close()
+    }
   }
 }

@@ -1,33 +1,13 @@
 {
   "ignored_warnings": [
     {
-      "warning_type": "Dangerous Eval",
-      "warning_code": 13,
-      "fingerprint": "f88611c38e2cc144be3a3a69fc6c96768c82211a4cb026bb124c2a65c4287f70",
-      "check_name": "Evaluation",
-      "message": "Dynamic string evaluated as code",
-      "file": "lib/active_record/detect_unsafe_migrations.rb",
-      "line": 40,
-      "link": "https://brakemanscanner.org/docs/warning_types/dangerous_eval/",
-      "code": "self.instance_eval(\"def change\\n  execute \\\"ALTER TABLE #{quote_table_name(table_name)} RENAME TO #{quote_table_name(\"_#{version}_#{table_name}_del\")}\\\"\\nend\\n\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ActiveRecord::Migration",
-        "method": "s(:self).change_table_and_warn"
-      },
-      "user_input": null,
-      "confidence": "Weak",
-      "note": "This eval is safe - it generates a simple ALTER TABLE statement for migration safety"
-    },
-    {
       "warning_type": "Redirect",
       "warning_code": 18,
       "fingerprint": "4a25ca6197b358e0e22f095839c291f719baea3ad580ea5815e2bf7244b707e7",
       "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/subscriptions_controller.rb",
-      "line": 61,
+      "line": 62,
       "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
       "code": "redirect_to(Current.user.payment_processor.checkout(:mode => \"subscription\", :line_items => ([{ :price => create_stripe_price(params[:plan_id], plans[params[:plan_id]][(params[:billing_cycle] or \"month\")]).id, :quantity => 1 }]), :subscription_data => ({ :trial_period_days => 14, :metadata => ({ :pay_name => params[:plan_id] }) })).url, :allow_other_host => true, :status => :see_other)",
       "render_path": null,
@@ -38,9 +18,104 @@
       },
       "user_input": "Current.user.payment_processor.checkout(:mode => \"subscription\", :line_items => ([{ :price => create_stripe_price(params[:plan_id], plans[params[:plan_id]][(params[:billing_cycle] or \"month\")]).id, :quantity => 1 }]), :subscription_data => ({ :trial_period_days => 14, :metadata => ({ :pay_name => params[:plan_id] }) })).url",
       "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
       "note": "This redirect is protected by valid_stripe_checkout_url? which validates that the URL is from an authorized Stripe domain"
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "792e7d47b6294c24e37ab2b0e084d09cd014775fe62f53130efee4b1c118e45a",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/connected_accounts_controller.rb",
+      "line": 58,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url), :allow_other_host => true, :status => :see_other)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ConnectedAccountsController",
+        "method": "refresh"
+      },
+      "user_input": "Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url)",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "9d6aa684915ac02a3c5c07efa8787e00775483f0d4ec70784c618086d6db1384",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/connected_accounts_controller.rb",
+      "line": 29,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url), :allow_other_host => true, :status => :see_other)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ConnectedAccountsController",
+        "method": "create"
+      },
+      "user_input": "Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url)",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "a22be43c6ac86a042637a106289711c438612fef5e3aaab03d2fd352c0fc43a4",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/connected_accounts_controller.rb",
+      "line": 73,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.user.merchant_processor.login_link, :allow_other_host => true, :status => :see_other)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ConnectedAccountsController",
+        "method": "dashboard"
+      },
+      "user_input": "Current.user.merchant_processor.login_link",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Dangerous Eval",
+      "warning_code": 13,
+      "fingerprint": "f88611c38e2cc144be3a3a69fc6c96768c82211a4cb026bb124c2a65c4287f70",
+      "check_name": "Evaluation",
+      "message": "Dynamic string evaluated as code",
+      "file": "lib/active_record/detect_unsafe_migrations.rb",
+      "line": 40,
+      "link": "https://brakemanscanner.org/docs/warning_types/dangerous_eval/",
+      "code": "self.instance_eval(\"def change\\n  execute \\\"ALTER TABLE #{quote_table_name(ActiveRecord::Migration::CommandRecorder.new(conn.pool.db_config.new_connection).commands.map do\n args.first\n end.first)} RENAME TO #{quote_table_name(\"_#{version}_#{ActiveRecord::Migration::CommandRecorder.new(conn.pool.db_config.new_connection).commands.map do\n args.first\n end.first}_del\")}\\\"\\nend\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ActiveRecord::DetectUnsafeMigrations",
+        "method": "exec_migration"
+      },
+      "user_input": null,
+      "confidence": "Weak",
+      "cwe_id": [
+        913,
+        95
+      ],
+      "note": "This eval is safe - it generates a simple ALTER TABLE statement for migration safety"
     }
   ],
-  "updated": "2025-09-26 00:00:00 +0000",
   "brakeman_version": "7.1.0"
 }

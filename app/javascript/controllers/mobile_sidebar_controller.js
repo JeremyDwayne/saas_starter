@@ -6,6 +6,13 @@ export default class extends Controller {
 
   connect() {
     this.openValue = false
+    // Listen for global open event from navbar button
+    this.boundOpen = this.open.bind(this)
+    window.addEventListener("mobile-sidebar:open", this.boundOpen)
+  }
+
+  disconnect() {
+    window.removeEventListener("mobile-sidebar:open", this.boundOpen)
   }
 
   open() {

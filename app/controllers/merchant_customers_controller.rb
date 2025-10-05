@@ -11,8 +11,7 @@ class MerchantCustomersController < ApplicationController
     @customers = Current.user.customers
                         .search(params[:query])
                         .recent
-                        .page(params[:page])
-                        .per(20)
+                        .limit(100)
   end
 
   # GET /customers/:id

@@ -1,0 +1,16 @@
+<div class="bg-gray-50 min-h-screen py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Add Customer</h1>
+      <p class="mt-1 text-sm text-gray-600">Create a new customer for invoicing</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <%= render "form", customer: @customer %>
+      </div>
+    </div>
+  </div>
+</div>

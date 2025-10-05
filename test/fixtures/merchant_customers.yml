@@ -1,0 +1,25 @@
+one:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  name: Acme Corporation
+  email: billing@acme.com
+  phone: "+1 555-123-4567"
+  address_line1: 123 Main Street
+  address_line2: Suite 100
+  city: San Francisco
+  state: CA
+  postal_code: "94102"
+  country: US
+  notes: Great customer
+
+two:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  name: Widget Inc
+  email: finance@widget.com
+  phone: "+1 555-987-6543"
+  address_line1: 456 Oak Avenue
+  city: New York
+  state: NY
+  postal_code: "10001"
+  country: US

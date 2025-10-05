@@ -22,4 +22,22 @@ Rails.application.config.to_prepare do
   Pay::Webhooks.delegator.subscribe "stripe.invoice.created" do |event|
     CreditApplicationWebhookJob.perform_later(event)
   end
+
+  # Connect invoice webhooks for merchant invoicing
+  # These events come from connected accounts
+  Pay::Webhooks.delegator.subscribe "stripe.invoice.paid" do |event|
+    MerchantInvoiceWebhookJob.perform_later(event)
+  end
+
+  Pay::Webhooks.delegator.subscribe "stripe.invoice.payment_failed" do |event|
+    MerchantInvoiceWebhookJob.perform_later(event)
+  end
+
+  Pay::Webhooks.delegator.subscribe "stripe.invoice.voided" do |event|
+    MerchantInvoiceWebhookJob.perform_later(event)
+  end
+
+  Pay::Webhooks.delegator.subscribe "stripe.invoice.marked_uncollectible" do |event|
+    MerchantInvoiceWebhookJob.perform_later(event)
+  end
 end

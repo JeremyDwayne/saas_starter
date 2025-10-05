@@ -1,0 +1,26 @@
+consulting:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  name: Consulting Services
+  description: Expert consulting on web development
+  default_price_cents: 15000
+  unit_type: hour
+  active: true
+
+monthly_service:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  name: Monthly Retainer
+  description: Monthly support and maintenance
+  default_price_cents: 500000
+  unit_type: month
+  active: true
+
+archived_service:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  name: Old Service
+  description: Deprecated service offering
+  default_price_cents: 10000
+  unit_type: item
+  active: false

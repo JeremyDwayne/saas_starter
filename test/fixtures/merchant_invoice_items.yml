@@ -1,0 +1,26 @@
+draft_item_one:
+  id: <%= SecureRandom.uuid %>
+  invoice: draft_invoice
+  product: consulting
+  description: Consulting work - Phase 1
+  quantity: 1
+  unit_price_cents: 15000
+  amount_cents: 15000
+
+open_item_one:
+  id: <%= SecureRandom.uuid %>
+  invoice: open_invoice
+  product: monthly_service
+  description: Monthly retainer - January
+  quantity: 1
+  unit_price_cents: 50000
+  amount_cents: 50000
+
+paid_item_one:
+  id: <%= SecureRandom.uuid %>
+  invoice: paid_invoice
+  product: consulting
+  description: Consulting work - Phase 2
+  quantity: 5
+  unit_price_cents: 15000
+  amount_cents: 75000

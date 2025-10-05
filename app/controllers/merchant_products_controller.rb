@@ -11,8 +11,7 @@ class MerchantProductsController < ApplicationController
     @products = Current.user.products
                        .search(params[:query])
                        .recent
-                       .page(params[:page])
-                       .per(20)
+                       .limit(100)
 
     @active_products = Current.user.products.active
     @inactive_products = Current.user.products.inactive

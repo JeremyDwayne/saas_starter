@@ -1,0 +1,263 @@
+<%= form_with(model: invoice, url: invoice.persisted? ? invoice_path(invoice) : invoices_path, data: { controller: "invoice-form" }, class: "space-y-8") do |f| %>
+  <% if invoice.errors.any? %>
+    <div class="rounded-md bg-red-50 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(invoice.errors.count, "error") %> prohibited this invoice from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc pl-5 space-y-1">
+              <% invoice.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Customer Selection -->
+  <div>
+    <h3 class="text-lg font-medium leading-6 text-gray-900">Customer</h3>
+    <div class="mt-4">
+      <%= f.label :customer_id, "Select Customer", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.collection_select :customer_id, @customers, :id, :name, { prompt: "Choose a customer..." }, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+      <p class="mt-2 text-sm text-gray-500">
+        Don't see your customer? <%= link_to "Add a new customer", new_customer_path, class: "text-blue-600 hover:text-blue-700", target: "_blank" %>
+      </p>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <div>
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">Line Items</h3>
+      <button type="button"
+              data-action="click->invoice-form#addLineItem"
+              class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <svg class="-ml-0.5 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Line Item
+      </button>
+    </div>
+
+    <div data-invoice-form-target="lineItems">
+      <%= f.fields_for :invoice_items do |item_form| %>
+        <div class="line-item bg-gray-50 p-4 rounded-lg mb-4">
+          <%= item_form.hidden_field :_destroy %>
+
+          <div class="grid grid-cols-12 gap-4">
+            <!-- Product Selection -->
+            <div class="col-span-12 sm:col-span-4">
+              <%= item_form.label :product_id, "Product (Optional)", class: "block text-sm font-medium text-gray-700" %>
+              <%= item_form.collection_select :product_id, @products, :id, :name,
+                { prompt: "Custom item...", include_blank: true },
+                {
+                  class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  data: { action: "change->invoice-form#productSelected" }
+                } do |product| %>
+                <option value="<%= product.id %>"
+                        data-description="<%= product.description %>"
+                        data-price="<%= product.default_price_dollars %>"
+                        data-unit-type="<%= product.unit_type %>">
+                  <%= product.name %>
+                </option>
+              <% end %>
+            </div>
+
+            <!-- Description -->
+            <div class="col-span-12 sm:col-span-8">
+              <%= item_form.label :description, "Description", class: "block text-sm font-medium text-gray-700" %>
+              <%= item_form.text_field :description, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm", placeholder: "Item description" %>
+            </div>
+
+            <!-- Quantity -->
+            <div class="col-span-6 sm:col-span-3">
+              <%= item_form.label :quantity, "Quantity", class: "block text-sm font-medium text-gray-700" %>
+              <%= item_form.number_field :quantity,
+                step: "0.01",
+                min: "0",
+                value: item_form.object.quantity || 1,
+                class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                data: { action: "input->invoice-form#quantityChanged" } %>
+            </div>
+
+            <!-- Unit Price -->
+            <div class="col-span-6 sm:col-span-3">
+              <%= item_form.label :unit_price_dollars, "Unit Price", class: "block text-sm font-medium text-gray-700" %>
+              <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span class="text-gray-500 sm:text-sm">$</span>
+                </div>
+                <%= item_form.number_field :unit_price_dollars,
+                  step: "0.01",
+                  min: "0",
+                  class: "block w-full pl-7 pr-12 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                  data: { action: "input->invoice-form#priceChanged" } %>
+              </div>
+            </div>
+
+            <!-- Total Display -->
+            <div class="col-span-6 sm:col-span-3">
+              <label class="block text-sm font-medium text-gray-700">Total</label>
+              <div class="mt-1 flex items-center h-10">
+                <span class="line-item-total text-lg font-medium text-gray-900">$0.00</span>
+              </div>
+            </div>
+
+            <!-- Remove Button -->
+            <div class="col-span-6 sm:col-span-3 flex items-end">
+              <button type="button"
+                      data-action="click->invoice-form#removeLineItem"
+                      class="w-full inline-flex justify-center items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Template for new line items -->
+    <template data-invoice-form-target="template">
+      <div class="line-item bg-gray-50 p-4 rounded-lg mb-4">
+        <div class="grid grid-cols-12 gap-4">
+          <!-- Product Selection -->
+          <div class="col-span-12 sm:col-span-4">
+            <label class="block text-sm font-medium text-gray-700">Product (Optional)</label>
+            <select name="merchant_invoice[invoice_items_attributes][NEW_RECORD][product_id]"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    data-action="change->invoice-form#productSelected">
+              <option value="">Custom item...</option>
+              <% @products.each do |product| %>
+                <option value="<%= product.id %>"
+                        data-description="<%= product.description %>"
+                        data-price="<%= product.default_price_dollars %>"
+                        data-unit-type="<%= product.unit_type %>">
+                  <%= product.name %>
+                </option>
+              <% end %>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div class="col-span-12 sm:col-span-8">
+            <label class="block text-sm font-medium text-gray-700">Description</label>
+            <input type="text"
+                   name="merchant_invoice[invoice_items_attributes][NEW_RECORD][description]"
+                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                   placeholder="Item description">
+          </div>
+
+          <!-- Quantity -->
+          <div class="col-span-6 sm:col-span-3">
+            <label class="block text-sm font-medium text-gray-700">Quantity</label>
+            <input type="number"
+                   name="merchant_invoice[invoice_items_attributes][NEW_RECORD][quantity]"
+                   value="1"
+                   step="0.01"
+                   min="0"
+                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                   data-action="input->invoice-form#quantityChanged">
+          </div>
+
+          <!-- Unit Price -->
+          <div class="col-span-6 sm:col-span-3">
+            <label class="block text-sm font-medium text-gray-700">Unit Price</label>
+            <div class="mt-1 relative rounded-md shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span class="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <input type="number"
+                     name="merchant_invoice[invoice_items_attributes][NEW_RECORD][unit_price_dollars]"
+                     step="0.01"
+                     min="0"
+                     class="block w-full pl-7 pr-12 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                     data-action="input->invoice-form#priceChanged">
+            </div>
+          </div>
+
+          <!-- Total Display -->
+          <div class="col-span-6 sm:col-span-3">
+            <label class="block text-sm font-medium text-gray-700">Total</label>
+            <div class="mt-1 flex items-center h-10">
+              <span class="line-item-total text-lg font-medium text-gray-900">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Remove Button -->
+          <div class="col-span-6 sm:col-span-3 flex items-end">
+            <button type="button"
+                    data-action="click->invoice-form#removeLineItem"
+                    class="w-full inline-flex justify-center items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- Totals Summary -->
+  <div class="bg-gray-50 px-4 py-5 sm:p-6 rounded-lg">
+    <div class="space-y-2">
+      <div class="flex justify-between text-sm">
+        <span class="font-medium text-gray-700">Subtotal:</span>
+        <span data-invoice-form-target="subtotal" class="text-gray-900">$0.00</span>
+      </div>
+      <div class="flex justify-between text-sm">
+        <span class="font-medium text-gray-700">Tax:</span>
+        <span data-invoice-form-target="tax" class="text-gray-900">$0.00</span>
+      </div>
+      <div class="border-t border-gray-200 pt-2 flex justify-between">
+        <span class="text-base font-semibold text-gray-900">Total:</span>
+        <span data-invoice-form-target="total" class="text-base font-semibold text-gray-900">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Terms -->
+  <div>
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Payment Terms</h3>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div>
+        <%= f.label :days_until_due, "Days Until Due", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.number_field :days_until_due,
+          value: f.object.days_until_due || 30,
+          min: "0",
+          class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" %>
+        <p class="mt-1 text-sm text-gray-500">Number of days from invoice date until payment is due</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div>
+    <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Additional Information</h3>
+    <div class="space-y-6">
+      <div>
+        <%= f.label :notes, "Notes", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_area :notes, rows: 3, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm", placeholder: "Any notes for the customer (e.g., payment instructions)" %>
+      </div>
+
+      <div>
+        <%= f.label :footer_text, "Footer Text", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_area :footer_text, rows: 2, class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm", placeholder: "Text to appear at the bottom of the invoice (e.g., thank you message)" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+    <%= link_to "Cancel", invoices_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    <%= f.submit invoice.persisted? ? "Update Invoice" : "Create Invoice", class: "inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  </div>
+<% end %>

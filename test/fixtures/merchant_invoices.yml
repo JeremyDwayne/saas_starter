@@ -1,0 +1,40 @@
+draft_invoice:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  customer: one
+  invoice_number: "000001"
+  status: draft
+  subtotal_cents: 15000
+  tax_cents: 0
+  total_cents: 15000
+  application_fee_cents: 0
+  days_until_due: 30
+
+open_invoice:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  customer: two
+  invoice_number: "000002"
+  status: open
+  subtotal_cents: 50000
+  tax_cents: 0
+  total_cents: 50000
+  application_fee_cents: 2500
+  days_until_due: 30
+  due_date: <%= 30.days.from_now.to_date %>
+  sent_at: <%= Time.current %>
+
+paid_invoice:
+  id: <%= SecureRandom.uuid %>
+  user: one
+  customer: one
+  invoice_number: "000003"
+  status: paid
+  subtotal_cents: 75000
+  tax_cents: 0
+  total_cents: 75000
+  application_fee_cents: 3750
+  days_until_due: 30
+  due_date: <%= 10.days.ago.to_date %>
+  sent_at: <%= 40.days.ago %>
+  paid_at: <%= 5.days.ago %>

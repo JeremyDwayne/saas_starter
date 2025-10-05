@@ -12,8 +12,7 @@ class MerchantInvoicesController < ApplicationController
     @invoices = Current.user.invoices
                        .includes(:customer)
                        .recent
-                       .page(params[:page])
-                       .per(20)
+                       .limit(100)
 
     # Filter by status if provided
     @invoices = @invoices.where(status: params[:status]) if params[:status].present?

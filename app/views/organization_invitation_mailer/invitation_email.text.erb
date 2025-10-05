@@ -1,0 +1,16 @@
+You're Invited to Join <%= @organization.name %>!
+
+Hi there,
+
+<%= @invited_by.name || @invited_by.email_address %> has invited you to join <%= @organization.name %> on SaaS Starter.
+
+You've been invited to join as a <%= @invitation.role.titleize %>.
+
+To accept this invitation, visit:
+<%= @accept_url %>
+
+If you don't already have an account, you'll be able to create one when you accept the invitation.
+
+This invitation will expire on <%= @invitation.expires_at.strftime("%B %d, %Y at %l:%M %p") %>.
+
+If you weren't expecting this invitation, you can safely ignore this email.

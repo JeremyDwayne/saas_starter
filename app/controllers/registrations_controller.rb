@@ -17,6 +17,26 @@ class RegistrationsController < ApplicationController
       end
 
       start_new_session_for(@user, source: "registration")
+
+      # Check for invitation token and accept if present
+      if session[:invitation_token].present?
+        invitation = OrganizationInvitation.find_by(token: session[:invitation_token])
+
+        if invitation && invitation.pending? && !invitation.expired? && invitation.email == @user.email_address
+          membership = invitation.accept!(@user)
+
+          if membership
+            session.delete(:invitation_token)
+            session[:current_organization_id] = invitation.organization_id
+            flash[:notice] = "Welcome! You've successfully joined #{invitation.organization.name}."
+            redirect_to organization_path(invitation.organization)
+            return
+          end
+        else
+          session.delete(:invitation_token)
+        end
+      end
+
       flash[:notice] = "Welcome! Your account has been created successfully."
       redirect_to after_authentication_url
     else

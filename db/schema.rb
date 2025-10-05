@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_05_201032) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_05_203154) do
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"
@@ -130,6 +130,23 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_201032) do
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
     t.index [ "user_id" ], name: "index_omni_auth_identities_on_user_id"
+  end
+
+  create_table "organization_invitations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.string "invited_by_id", null: false
+    t.string "organization_id", null: false
+    t.string "role", default: "member", null: false
+    t.string "status", default: "pending", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "email" ], name: "index_organization_invitations_on_email"
+    t.index [ "invited_by_id" ], name: "index_organization_invitations_on_invited_by_id"
+    t.index [ "organization_id", "email" ], name: "index_organization_invitations_on_organization_id_and_email", unique: true, where: "status = 'pending'"
+    t.index [ "organization_id" ], name: "index_organization_invitations_on_organization_id"
+    t.index [ "token" ], name: "index_organization_invitations_on_token", unique: true
   end
 
   create_table "organization_memberships", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
@@ -411,6 +428,8 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_201032) do
   end
 
   add_foreign_key "custom_platform_fees", "users"
+  add_foreign_key "organization_invitations", "organizations"
+  add_foreign_key "organization_invitations", "users", column: "invited_by_id"
   add_foreign_key "pay_charges", "pay_customers", column: "customer_id"
   add_foreign_key "pay_charges", "pay_subscriptions", column: "subscription_id"
   add_foreign_key "pay_payment_methods", "pay_customers", column: "customer_id"

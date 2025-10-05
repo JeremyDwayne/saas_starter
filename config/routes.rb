@@ -38,7 +38,16 @@ Rails.application.routes.draw do
     member do
       post :switch
     end
+
+    # Organization members (nested under organizations)
+    resources :members, controller: "organization_members", only: [ :index, :destroy, :update ]
+
+    # Organization invitations (nested under organizations)
+    resources :invitations, controller: "organization_invitations", only: [ :index, :new, :create, :destroy ]
   end
+
+  # Invitation acceptance (not nested, uses token)
+  get "/invitations/:token/accept", to: "organization_invitations#accept", as: :accept_organization_invitation
 
   # Pay routes are automatically mounted by the gem
 

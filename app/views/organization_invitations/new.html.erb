@@ -1,0 +1,80 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <%= link_to organization_members_path(@organization), class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" do %>
+      ← Back to Team Members
+    <% end %>
+  </div>
+
+  <div class="bg-white shadow sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">Invite Team Member</h1>
+
+      <%= form_with model: @invitation, url: organization_invitations_path(@organization), class: "space-y-6" do |form| %>
+        <% if @invitation.errors.any? %>
+          <div class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  There <%= @invitation.errors.count == 1 ? 'was' : 'were' %> <%= pluralize(@invitation.errors.count, "error") %> with your invitation:
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc list-inside space-y-1">
+                    <% @invitation.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div>
+          <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.email_field :email, autofocus: true, required: true, placeholder: "colleague@example.com", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          <p class="mt-2 text-sm text-gray-500">Enter the email address of the person you'd like to invite.</p>
+        </div>
+
+        <div>
+          <%= form.label :role, "Role", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.select :role, [['Member - Can view and contribute', 'member'], ['Admin - Full access to manage team', 'admin']], {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+          <p class="mt-2 text-sm text-gray-500">
+            <strong>Members</strong> can access organization resources.<br>
+            <strong>Admins</strong> can manage members, settings, and have full access to the organization.
+          </p>
+        </div>
+
+        <div class="flex items-center justify-end gap-x-3 pt-4">
+          <%= link_to "Cancel", organization_members_path(@organization), class: "px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 rounded-md" %>
+          <%= form.submit "Send Invitation", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3 flex-1">
+        <h3 class="text-sm font-medium text-blue-800">What happens next?</h3>
+        <div class="mt-2 text-sm text-blue-700">
+          <ul class="list-disc list-inside space-y-1">
+            <li>We'll send an email invitation to the address you provide</li>
+            <li>They'll have 7 days to accept the invitation</li>
+            <li>If they don't have an account, they can create one during acceptance</li>
+            <li>You can revoke the invitation at any time before it's accepted</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

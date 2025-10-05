@@ -26,7 +26,7 @@ class ConnectedAccountsController < ApplicationController
       )
 
       # Brakeman: False positive - redirect to Stripe's official onboarding flow
-      redirect_to account_link, allow_other_host: true, status: :see_other
+      redirect_to account_link.url, allow_other_host: true, status: :see_other
     rescue => e
       Rails.logger.error "Failed to create connected account: #{e.message}"
       redirect_to new_connected_account_path, alert: "Failed to start onboarding. Please try again."
@@ -55,7 +55,7 @@ class ConnectedAccountsController < ApplicationController
         return_url: return_connected_account_url
       )
       # Brakeman: False positive - redirect to Stripe's official onboarding flow
-      redirect_to account_link, allow_other_host: true, status: :see_other
+      redirect_to account_link.url, allow_other_host: true, status: :see_other
     rescue => e
       Rails.logger.error "Failed to refresh account link: #{e.message}"
       redirect_to settings_path, alert: "Failed to refresh onboarding. Please try again."
@@ -70,10 +70,53 @@ class ConnectedAccountsController < ApplicationController
       # and is guaranteed to be a valid Stripe domain (connect.stripe.com)
       login_link = Current.user.merchant_processor.login_link
       # Brakeman: False positive - redirect to Stripe Express Dashboard
-      redirect_to login_link, allow_other_host: true, status: :see_other
+      redirect_to login_link.url, allow_other_host: true, status: :see_other
     rescue => e
       Rails.logger.error "Failed to generate dashboard link: #{e.message}"
       redirect_to settings_path, alert: "Failed to access dashboard. Please try again."
+    end
+  end
+
+  # POST /connected_account/sync
+  # Manually sync merchant account status from Stripe
+  def sync
+    begin
+      merchant = Current.user.merchant_processor
+
+      unless merchant&.processor_id
+        redirect_to settings_path, alert: "No connected account found to sync."
+        return
+      end
+
+      # Retrieve account details from Stripe
+      account = Stripe::Account.retrieve(merchant.processor_id)
+
+      # Calculate onboarding completion status
+      onboarding_complete = account.details_submitted &&
+                           account.charges_enabled &&
+                           account.payouts_enabled
+
+      # Initialize data as empty hash if nil
+      current_data = merchant.data || {}
+
+      # Update merchant data with fresh account information
+      merchant.update(
+        data: current_data.merge(
+          "onboarding_complete" => onboarding_complete,
+          "charges_enabled" => account.charges_enabled,
+          "payouts_enabled" => account.payouts_enabled,
+          "details_submitted" => account.details_submitted
+        )
+      )
+
+      if onboarding_complete
+        redirect_to settings_path, notice: "Account synced successfully! Your account is ready to accept payments."
+      else
+        redirect_to settings_path, warning: "Account synced. Onboarding is still incomplete. Please complete all required steps."
+      end
+    rescue => e
+      Rails.logger.error "Failed to sync account: #{e.message}"
+      redirect_to settings_path, alert: "Failed to sync account. Please try again."
     end
   end
 

@@ -50,6 +50,7 @@ Rails.application.routes.draw do
       get :return
       get :refresh
       get :dashboard
+      post :sync
     end
   end
 

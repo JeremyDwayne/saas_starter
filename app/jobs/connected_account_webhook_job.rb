@@ -37,9 +37,25 @@ class ConnectedAccountWebhookJob < ApplicationJob
 
     return unless merchant_processor
 
-    # Update account details (charges_enabled, payouts_enabled, etc.)
-    # The Pay gem will handle syncing account status automatically
-    Rails.logger.info "Account #{account_id} updated successfully"
+    # Extract onboarding completion status from account details
+    onboarding_complete = account_data.dig("details_submitted") &&
+                         account_data.dig("charges_enabled") &&
+                         account_data.dig("payouts_enabled")
+
+    # Initialize data as empty hash if nil
+    current_data = merchant_processor.data || {}
+
+    # Update merchant data with account information
+    merchant_processor.update(
+      data: current_data.merge(
+        "onboarding_complete" => onboarding_complete,
+        "charges_enabled" => account_data["charges_enabled"],
+        "payouts_enabled" => account_data["payouts_enabled"],
+        "details_submitted" => account_data["details_submitted"]
+      )
+    )
+
+    Rails.logger.info "Account #{account_id} updated - Onboarding complete: #{onboarding_complete}"
   end
 
   # Handle successful charges

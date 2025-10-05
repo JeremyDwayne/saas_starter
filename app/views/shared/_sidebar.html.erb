@@ -100,7 +100,7 @@
                     </li>
                   <% end %>
 
-                  <% if Current.user&.on_trial_or_subscribed? %>
+                  <% if Current.organization&.on_trial_or_subscribed? %>
                     <li>
                       <%= link_to invoices_path,
                           class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(invoices_path) || request.path.start_with?('/invoices') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
@@ -141,9 +141,9 @@
                     <% end %>
                   </li>
 
-                  <% if Current.user&.subscribed? %>
+                  <% if Current.organization&.subscribed? %>
                     <li>
-                      <%= link_to '/pay/subscriptions',
+                      <%= link_to edit_organization_path(Current.organization, tab: 'billing'),
                           class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold text-gray-700 hover:text-blue-600 hover:bg-gray-50",
                           data: { action: "click->mobile-sidebar#close" } do %>
                         <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">

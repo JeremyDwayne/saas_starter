@@ -183,17 +183,17 @@
             <div>
               <p class="text-sm font-medium text-gray-900">No Payment Processing Account</p>
               <p class="text-sm text-gray-500 mt-1">Connect your Stripe account to start charging customers</p>
-              <% unless Current.user.on_trial_or_subscribed? %>
+              <% unless Current.organization&.on_trial_or_subscribed? %>
                 <p class="text-sm text-orange-600 mt-2 font-medium">
                   <%= icon 'exclamation-triangle', class: 'h-4 w-4 inline mr-1' %>
-                  You need an active subscription to connect a payment account
+                  Your organization needs an active subscription to connect a payment account
                 </p>
               <% end %>
             </div>
           </div>
 
           <div>
-            <% if Current.user.on_trial_or_subscribed? %>
+            <% if Current.organization&.on_trial_or_subscribed? %>
               <%= link_to "Connect Stripe Account", new_connected_account_path,
                     class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
             <% else %>
@@ -319,71 +319,75 @@
       <div class="px-4 py-5 sm:p-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Subscription & Billing</h3>
 
-        <% if Current.user.subscribed? %>
-          <% subscription = Current.user.subscription %>
-          <div class="space-y-4">
-            <% if subscription.on_trial? %>
-              <!-- Trial Status -->
-              <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <div>
-                  <div class="flex items-center">
-                    <%= icon 'clock', class: 'h-5 w-5 text-blue-400 mr-2' %>
-                    <p class="text-sm font-medium text-blue-800">Free Trial Active</p>
-                  </div>
-                  <div class="mt-2 text-sm text-blue-700">
-                    <p><strong>Plan:</strong> <%= subscription.name&.humanize || "Trial Plan" %></p>
-                    <p><strong>Trial ends:</strong> <%= subscription.trial_ends_at.strftime("%B %d, %Y") %></p>
-                    <p><strong>Status:</strong> <%= subscription.status.humanize %></p>
-                    <% if @user.available_credit_balance > 0 %>
-                      <p><strong>Available Credits:</strong> $<%= sprintf("%.2f", @user.available_credit_balance_dollars) %> (will be applied to your next bill)</p>
-                    <% end %>
+        <% if Current.organization %>
+          <p class="text-sm text-gray-600 mb-4">Subscription is managed at the organization level. Current organization: <strong><%= Current.organization.name %></strong></p>
+
+          <% if Current.organization.subscribed? %>
+            <% subscription = Current.organization.subscription %>
+            <div class="space-y-4">
+              <% if subscription.on_trial? %>
+                <!-- Trial Status -->
+                <div class="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-md">
+                  <div>
+                    <div class="flex items-center">
+                      <%= icon 'clock', class: 'h-5 w-5 text-blue-400 mr-2' %>
+                      <p class="text-sm font-medium text-blue-800">Free Trial Active</p>
+                    </div>
+                    <div class="mt-2 text-sm text-blue-700">
+                      <p><strong>Plan:</strong> <%= subscription.name&.humanize || "Trial Plan" %></p>
+                      <p><strong>Trial ends:</strong> <%= subscription.trial_ends_at.strftime("%B %d, %Y") %></p>
+                      <p><strong>Status:</strong> <%= subscription.status.humanize %></p>
+                      <% if @user.available_credit_balance > 0 %>
+                        <p><strong>Available Credits:</strong> $<%= sprintf("%.2f", @user.available_credit_balance_dollars) %> (will be applied to your next bill)</p>
+                      <% end %>
+                    </div>
                   </div>
                 </div>
               <% else %>
-              <!-- Active Subscription -->
-              <div class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-md">
-                <div>
-                  <div class="flex items-center">
-                    <%= icon 'check-circle', class: 'h-5 w-5 text-green-400 mr-2' %>
-                    <p class="text-sm font-medium text-green-800">Active Subscription</p>
-                  </div>
-                  <div class="mt-2 text-sm text-green-700">
-                    <p><strong>Plan:</strong> <%= subscription.name&.humanize || "Active Plan" %></p>
-                    <% if subscription.ends_at %>
-                      <p><strong>Renews:</strong> <%= subscription.ends_at.strftime("%B %d, %Y") %></p>
-                    <% end %>
-                    <% if subscription.canceled? %>
-                      <p class="text-orange-600"><strong>Status:</strong> Canceled (active until <%= subscription.ends_at.strftime("%B %d, %Y") %>)</p>
-                    <% else %>
-                      <p><strong>Status:</strong> <%= subscription.status.humanize %></p>
-                    <% end %>
-                    <% if @user.available_credit_balance > 0 %>
-                      <p><strong>Available Credits:</strong> $<%= sprintf("%.2f", @user.available_credit_balance_dollars) %> (will be applied to your next bill)</p>
-                    <% end %>
+                <!-- Active Subscription -->
+                <div class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-md">
+                  <div>
+                    <div class="flex items-center">
+                      <%= icon 'check-circle', class: 'h-5 w-5 text-green-400 mr-2' %>
+                      <p class="text-sm font-medium text-green-800">Active Subscription</p>
+                    </div>
+                    <div class="mt-2 text-sm text-green-700">
+                      <p><strong>Plan:</strong> <%= subscription.name&.humanize || "Active Plan" %></p>
+                      <% if subscription.ends_at %>
+                        <p><strong>Renews:</strong> <%= subscription.ends_at.strftime("%B %d, %Y") %></p>
+                      <% end %>
+                      <% if subscription.canceled? %>
+                        <p class="text-orange-600"><strong>Status:</strong> Canceled (active until <%= subscription.ends_at.strftime("%B %d, %Y") %>)</p>
+                      <% else %>
+                        <p><strong>Status:</strong> <%= subscription.status.humanize %></p>
+                      <% end %>
+                      <% if @user.available_credit_balance > 0 %>
+                        <p><strong>Available Credits:</strong> $<%= sprintf("%.2f", @user.available_credit_balance_dollars) %> (will be applied to your next bill)</p>
+                      <% end %>
+                    </div>
                   </div>
                 </div>
               <% end %>
               <div class="flex space-x-2">
-                <% if Current.user.subscribed? %>
-                  <% portal_session = Current.user.payment_processor.billing_portal(return_url: settings_url) %>
-                  <%= link_to "Manage Billing", portal_session.url,
-                      target: "_blank",
-                      class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-                <% else %>
-                  <%= link_to "View Plans", pricing_path,
-                      class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-                <% end %>
+                <%= link_to "Manage Billing", edit_organization_path(Current.organization, tab: 'billing'),
+                    class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
               </div>
             </div>
-          </div>
-        <% else %>
-          <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-md">
-            <div>
-              <p class="text-sm font-medium text-gray-900">No Active Subscription</p>
-              <p class="text-sm text-gray-500 mt-1">Choose a plan to get started with premium features</p>
+          <% else %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-md">
+              <div>
+                <p class="text-sm font-medium text-gray-900">No Active Subscription</p>
+                <p class="text-sm text-gray-500 mt-1">Choose a plan to get started with premium features</p>
+              </div>
+              <%= link_to "View Plans", pricing_path,
+                  class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
             </div>
-            <%= link_to "View Plans", pricing_path,
-                class: "inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+          <% end %>
+        <% else %>
+          <div class="text-center py-6">
+            <p class="text-sm text-gray-500">Please create or select an organization to manage subscriptions.</p>
+            <%= link_to "Create Organization", new_organization_path,
+                class: "mt-4 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
           </div>
         <% end %>
       </div>

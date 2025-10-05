@@ -1,5 +1,7 @@
 class SubscriptionsController < ApplicationController
+  before_action :require_organization_context
   layout "dashboard", only: [ :success ]
+
   def create
     plan_id = params[:plan_id]
     billing_cycle = params[:billing_cycle] || "month"
@@ -30,14 +32,14 @@ class SubscriptionsController < ApplicationController
     plan_config = plans[plan_id][billing_cycle]
 
     begin
-      # Set up Stripe as payment processor
-      Current.user.set_payment_processor(:stripe)
+      # Set up Stripe as payment processor for the organization
+      Current.organization.set_payment_processor(:stripe)
 
       # Create or find Stripe Price for the plan
       price = create_stripe_price(plan_id, plan_config)
 
-      # Create Stripe Checkout Session using Pay gem
-      checkout_session = Current.user.payment_processor.checkout(
+      # Create Stripe Checkout Session using Pay gem for the organization
+      checkout_session = Current.organization.payment_processor.checkout(
         mode: "subscription",
         line_items: [ {
           price: price.id,
@@ -81,11 +83,11 @@ class SubscriptionsController < ApplicationController
   end
 
   def cancel_subscription
-    if Current.user.subscribed?
-      Current.user.subscription.cancel
-      flash[:notice] = "Your subscription has been cancelled successfully."
+    if Current.organization.subscribed?
+      Current.organization.subscription.cancel
+      flash[:notice] = "Your organization's subscription has been cancelled successfully."
     else
-      flash[:alert] = "No active subscription found."
+      flash[:alert] = "No active subscription found for this organization."
     end
 
     redirect_to dashboard_path

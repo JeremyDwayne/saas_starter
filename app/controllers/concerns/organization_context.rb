@@ -64,4 +64,12 @@ module OrganizationContext
 
     redirect_to new_organization_path, alert: "Please create or select an organization to continue."
   end
+
+  # Require that the current organization has an active subscription
+  # Redirects to pricing page if not subscribed
+  def require_subscription
+    return if Current.organization&.on_trial_or_subscribed?
+
+    redirect_to pricing_path, alert: "This feature requires an active subscription for your organization."
+  end
 end

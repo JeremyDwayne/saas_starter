@@ -1,6 +1,7 @@
 # Platform charges controller
 # Handles creating charges and viewing transaction history
 class PlatformChargesController < ApplicationController
+  before_action :require_subscription
   before_action :require_merchant_onboarded, except: [ :index, :show ]
 
   # GET /charges/new
@@ -56,6 +57,13 @@ class PlatformChargesController < ApplicationController
   # Strong parameters for charge creation
   def charge_params
     params.require(:charge).permit(:amount_cents, :customer_email, :description, metadata: {})
+  end
+
+  # Ensure user has active subscription
+  def require_subscription
+    unless Current.user.on_trial_or_subscribed?
+      redirect_to pricing_path, alert: "You need an active subscription to access payment features."
+    end
   end
 
   # Ensure merchant has completed onboarding before creating charges

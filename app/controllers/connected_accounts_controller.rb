@@ -1,7 +1,7 @@
 # Connected accounts controller
 # Handles Stripe Connect onboarding and account management
 class ConnectedAccountsController < ApplicationController
-  before_action :require_subscription, only: [ :create ]
+  before_action :require_subscription
 
   # GET /connected_account/new
   # Show onboarding information page

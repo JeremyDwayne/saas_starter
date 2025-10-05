@@ -75,4 +75,126 @@ class Sessions::OmniAuthsControllerTest < ActionDispatch::IntegrationTest
     assert_equal referrer, referral.referrer
     assert_equal new_user, referral.referee
   end
+
+  test "OAuth sign-in accepts pending invitation for existing user" do
+    # Setup: Create organization and invitation
+    organization = organizations(:one)
+    invited_email = "existing_oauth@example.com"
+
+    # Create existing user with this email
+    existing_user = User.create!(
+      email_address: invited_email,
+      password: "password123"
+    )
+
+    invitation = organization.organization_invitations.create!(
+      email: invited_email,
+      role: "member",
+      invited_by: users(:one)
+    )
+
+    assert invitation.pending?
+    assert_not organization.users.include?(existing_user)
+
+    # Simulate clicking invitation link (stores token in session)
+    get accept_organization_invitation_path(token: invitation.token)
+    assert_redirected_to signup_path
+    assert_equal invitation.token, session[:invitation_token]
+
+    # Setup OAuth test mode
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      "uid" => "google_12345",
+      "provider" => "google_oauth2",
+      "info" => {
+        "email" => invited_email,
+        "name" => "OAuth Test User"
+      }
+    })
+
+    # Simulate OAuth callback
+    assert_difference "OrganizationMembership.count" do
+      get "/auth/google_oauth2/callback"
+    end
+
+    # Verify invitation was accepted
+    assert_redirected_to organization_path(organization)
+    follow_redirect!
+    assert_notice "You've successfully joined #{organization.name}!"
+
+    # Verify membership was created
+    membership = organization.organization_memberships.find_by(user: existing_user)
+    assert membership.present?
+    assert_equal "member", membership.role
+
+    # Verify invitation is no longer pending
+    assert_not invitation.reload.pending?
+
+    # Verify session token was cleared
+    assert_nil session[:invitation_token]
+
+    # Verify organization context was set
+    assert_equal organization.id, session[:current_organization_id]
+
+    # Cleanup
+    OmniAuth.config.test_mode = false
+  end
+
+  test "OAuth sign-in accepts pending invitation for new user" do
+    # Setup: Create organization and invitation
+    organization = organizations(:one)
+    invited_email = "new_oauth@example.com"
+
+    invitation = organization.organization_invitations.create!(
+      email: invited_email,
+      role: "admin",
+      invited_by: users(:one)
+    )
+
+    assert invitation.pending?
+
+    # Simulate clicking invitation link (stores token in session)
+    get accept_organization_invitation_path(token: invitation.token)
+    assert_redirected_to signup_path
+    assert_equal invitation.token, session[:invitation_token]
+
+    # Setup OAuth test mode
+    OmniAuth.config.test_mode = true
+    OmniAuth.config.mock_auth[:google_oauth2] = OmniAuth::AuthHash.new({
+      "uid" => "google_67890",
+      "provider" => "google_oauth2",
+      "info" => {
+        "email" => invited_email,
+        "name" => "New OAuth User"
+      }
+    })
+
+    # Simulate OAuth callback - should create user AND accept invitation
+    assert_difference [ "User.count", "OrganizationMembership.count" ] do
+      get "/auth/google_oauth2/callback"
+    end
+
+    # Verify invitation was accepted
+    assert_redirected_to organization_path(organization)
+    follow_redirect!
+    assert_notice "You've successfully joined #{organization.name}!"
+
+    # Verify user was created
+    new_user = User.find_by(email_address: invited_email)
+    assert new_user.present?
+
+    # Verify membership was created with correct role
+    membership = organization.organization_memberships.find_by(user: new_user)
+    assert membership.present?
+    assert_equal "admin", membership.role
+
+    # Verify invitation is no longer pending
+    assert_not invitation.reload.pending?
+
+    # Verify session token was cleared
+    assert_nil session[:invitation_token]
+
+    # Cleanup
+    OmniAuth.config.test_mode = false
+  end
 end

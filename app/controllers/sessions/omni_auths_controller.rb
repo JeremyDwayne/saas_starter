@@ -113,6 +113,25 @@ class Sessions::OmniAuthsController < ApplicationController
       end
 
       start_new_session_for user_to_sign_in
+
+      # Check for invitation token and accept if present
+      if session[:invitation_token].present?
+        invitation = OrganizationInvitation.find_by(token: session[:invitation_token])
+
+        if invitation && invitation.pending? && !invitation.expired? && invitation.email == user_to_sign_in.email_address
+          membership = invitation.accept!(user_to_sign_in)
+
+          if membership
+            session.delete(:invitation_token)
+            session[:current_organization_id] = invitation.organization_id
+            redirect_to organization_path(invitation.organization), notice: "You've successfully joined #{invitation.organization.name}!"
+            return
+          end
+        else
+          session.delete(:invitation_token)
+        end
+      end
+
       redirect_to redirect_path, notice: "Signed in!"
     end
   end

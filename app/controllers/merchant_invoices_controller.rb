@@ -3,13 +3,14 @@
 # Merchant Invoices Controller
 # Handles CRUD operations and actions for merchant invoices
 class MerchantInvoicesController < ApplicationController
+  before_action :require_organization_context
   before_action :require_subscription
   before_action :require_merchant_onboarded, except: [ :index, :show ]
   before_action :set_invoice, only: [ :show, :edit, :update, :destroy, :send_invoice, :mark_paid, :void ]
 
   # GET /invoices
   def index
-    @invoices = Current.user.invoices
+    @invoices = Current.organization.merchant_invoices
                        .includes(:customer)
                        .recent
                        .limit(100)
@@ -18,11 +19,11 @@ class MerchantInvoicesController < ApplicationController
     @invoices = @invoices.where(status: params[:status]) if params[:status].present?
 
     # Summary stats
-    @draft_count = Current.user.invoices.draft.count
-    @open_count = Current.user.invoices.open.count
-    @paid_count = Current.user.invoices.paid.count
-    @overdue_count = Current.user.invoices.overdue.count
-    @total_outstanding = Current.user.invoices.unpaid.sum(:total_cents)
+    @draft_count = Current.organization.merchant_invoices.draft.count
+    @open_count = Current.organization.merchant_invoices.open.count
+    @paid_count = Current.organization.merchant_invoices.paid.count
+    @overdue_count = Current.organization.merchant_invoices.overdue.count
+    @total_outstanding = Current.organization.merchant_invoices.unpaid.sum(:total_cents)
   end
 
   # GET /invoices/:id
@@ -31,27 +32,27 @@ class MerchantInvoicesController < ApplicationController
 
   # GET /invoices/new
   def new
-    @invoice = Current.user.invoices.build
+    @invoice = Current.organization.merchant_invoices.build
     @invoice.invoice_items.build # Start with one line item
-    @customers = Current.user.customers.order(:name)
-    @products = Current.user.products.active.order(:name)
+    @customers = Current.organization.merchant_customers.order(:name)
+    @products = Current.organization.merchant_products.active.order(:name)
   end
 
   # GET /invoices/:id/edit
   def edit
-    @customers = Current.user.customers.order(:name)
-    @products = Current.user.products.active.order(:name)
+    @customers = Current.organization.merchant_customers.order(:name)
+    @products = Current.organization.merchant_products.active.order(:name)
   end
 
   # POST /invoices
   def create
-    @invoice = Current.user.invoices.build(invoice_params)
+    @invoice = Current.organization.merchant_invoices.build(invoice_params)
 
     if @invoice.save
       redirect_to invoice_path(@invoice), notice: "Invoice created successfully."
     else
-      @customers = Current.user.customers.order(:name)
-      @products = Current.user.products.active.order(:name)
+      @customers = Current.organization.merchant_customers.order(:name)
+      @products = Current.organization.merchant_products.active.order(:name)
       render :new, status: :unprocessable_entity
     end
   end
@@ -61,8 +62,8 @@ class MerchantInvoicesController < ApplicationController
     if @invoice.draft? && @invoice.update(invoice_params)
       redirect_to invoice_path(@invoice), notice: "Invoice updated successfully."
     else
-      @customers = Current.user.customers.order(:name)
-      @products = Current.user.products.active.order(:name)
+      @customers = Current.organization.merchant_customers.order(:name)
+      @products = Current.organization.merchant_products.active.order(:name)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -124,7 +125,7 @@ class MerchantInvoicesController < ApplicationController
   private
 
   def set_invoice
-    @invoice = Current.user.invoices.includes(:customer, :invoice_items).find(params[:id])
+    @invoice = Current.organization.merchant_invoices.includes(:customer, :invoice_items).find(params[:id])
   end
 
   def invoice_params
@@ -138,13 +139,13 @@ class MerchantInvoicesController < ApplicationController
   end
 
   def require_subscription
-    unless Current.user.on_trial_or_subscribed?
+    unless Current.organization.on_trial_or_subscribed?
       redirect_to pricing_path, alert: "You need an active subscription to manage invoices."
     end
   end
 
   def require_merchant_onboarded
-    unless Current.user.merchant_onboarding_complete?
+    unless Current.organization.merchant_onboarding_complete?
       redirect_to new_connected_account_path,
                   alert: "Please complete Stripe Connect onboarding before creating invoices."
     end

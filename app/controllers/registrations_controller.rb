@@ -37,8 +37,14 @@ class RegistrationsController < ApplicationController
         end
       end
 
-      flash[:notice] = "Welcome! Your account has been created successfully."
-      redirect_to after_authentication_url
+      # Check if user needs to create their first organization
+      if @user.organizations.none?
+        flash[:notice] = "Welcome! Let's create your first organization to get started."
+        redirect_to new_organization_path
+      else
+        flash[:notice] = "Welcome! Your account has been created successfully."
+        redirect_to after_authentication_url
+      end
     else
       render :new, status: :unprocessable_entity
     end

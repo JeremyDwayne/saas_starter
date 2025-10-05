@@ -1,0 +1,212 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <%= link_to @organization, class: "text-sm font-medium text-indigo-600 hover:text-indigo-500" do %>
+      ← Back to organization
+    <% end %>
+  </div>
+
+  <div class="bg-white shadow sm:rounded-lg">
+    <!-- Header -->
+    <div class="px-4 py-5 sm:p-6 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-gray-900">Organization Settings</h1>
+      <p class="mt-1 text-sm text-gray-600">Manage your organization's settings and preferences</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200" data-controller="tabs">
+      <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+        <button
+          data-action="click->tabs#change"
+          data-tabs-target="tab"
+          data-tab-name="general"
+          class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          General
+        </button>
+        <button
+          data-action="click->tabs#change"
+          data-tabs-target="tab"
+          data-tab-name="billing"
+          class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          Billing
+        </button>
+        <button
+          data-action="click->tabs#change"
+          data-tabs-target="tab"
+          data-tab-name="stripe_connect"
+          class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+        >
+          Stripe Connect
+        </button>
+      </nav>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="px-4 py-5 sm:p-6">
+      <!-- General Tab -->
+      <div data-tabs-target="panel" data-tab-name="general">
+        <%= form_with model: @organization, class: "space-y-6" do |form| %>
+          <% if @organization.errors.any? %>
+            <div class="rounded-md bg-red-50 p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-red-800">
+                    There <%= @organization.errors.count == 1 ? 'was' : 'were' %> <%= pluralize(@organization.errors.count, "error") %>:
+                  </h3>
+                  <div class="mt-2 text-sm text-red-700">
+                    <ul class="list-disc list-inside space-y-1">
+                      <% @organization.errors.full_messages.each do |message| %>
+                        <li><%= message %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <div>
+            <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :name, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            <p class="mt-2 text-sm text-gray-500">The name of your organization</p>
+          </div>
+
+          <div>
+            <%= form.label :slug, class: "block text-sm font-medium text-gray-700" %>
+            <%= form.text_field :slug, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" %>
+            <p class="mt-2 text-sm text-gray-500">URL-friendly identifier for your organization (optional)</p>
+          </div>
+
+          <div class="flex items-center justify-end gap-x-3">
+            <%= link_to "Cancel", @organization, class: "px-3 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 rounded-md" %>
+            <%= form.submit "Save Changes", class: "rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Billing Tab -->
+      <div data-tabs-target="panel" data-tab-name="billing" class="hidden">
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-lg font-medium text-gray-900">Subscription & Billing</h3>
+            <p class="mt-1 text-sm text-gray-600">Manage your organization's subscription and billing details</p>
+          </div>
+
+          <% if @organization.payment_processor %>
+            <div class="bg-gray-50 rounded-lg p-6">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900">Current Plan</h4>
+                  <% if @organization.subscription %>
+                    <p class="mt-1 text-sm text-gray-600">
+                      <%= @organization.subscription.name || "Active Subscription" %>
+                      <% if @organization.on_trial? %>
+                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Trial
+                        </span>
+                      <% end %>
+                    </p>
+                  <% else %>
+                    <p class="mt-1 text-sm text-gray-600">No active subscription</p>
+                  <% end %>
+                </div>
+                <%= link_to "Manage Billing", @organization.payment_processor.billing_portal_url(return_url: edit_organization_url(@organization)), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", data: { turbo: false } %>
+              </div>
+            </div>
+          <% else %>
+            <div class="bg-yellow-50 rounded-lg p-4">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-sm font-medium text-yellow-800">No billing setup</h3>
+                  <div class="mt-2 text-sm text-yellow-700">
+                    <p>Set up a subscription to access billing features.</p>
+                  </div>
+                  <div class="mt-4">
+                    <%= link_to "Choose a Plan", pricing_path, class: "text-sm font-medium text-yellow-800 hover:text-yellow-700" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Stripe Connect Tab -->
+      <div data-tabs-target="panel" data-tab-name="stripe_connect" class="hidden">
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-lg font-medium text-gray-900">Payment Processing</h3>
+            <p class="mt-1 text-sm text-gray-600">Connect your Stripe account to accept payments</p>
+          </div>
+
+          <% if @organization.merchant_onboarding_complete? %>
+            <div class="bg-green-50 rounded-lg p-6">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                  <h4 class="text-sm font-medium text-green-800">Connected to Stripe</h4>
+                  <p class="mt-1 text-sm text-green-700">Your organization can accept payments</p>
+                </div>
+                <div class="ml-3">
+                  <%= link_to "Manage Account", dashboard_connected_account_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500" %>
+                </div>
+              </div>
+
+              <div class="mt-4 border-t border-green-200 pt-4">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
+                  <div>
+                    <dt class="text-sm font-medium text-green-800">Platform Fee</dt>
+                    <dd class="mt-1 text-sm text-green-700"><%= @organization.platform_fee_percentage %>%</dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-green-800">Status</dt>
+                    <dd class="mt-1 text-sm text-green-700">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          <% else %>
+            <div class="bg-blue-50 rounded-lg p-6">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                  <h4 class="text-sm font-medium text-blue-800">Connect to Stripe</h4>
+                  <div class="mt-2 text-sm text-blue-700">
+                    <p>Connect your Stripe account to start accepting payments from customers.</p>
+                    <p class="mt-2">Platform fee: <span class="font-medium"><%= @organization.platform_fee_percentage %>%</span></p>
+                  </div>
+                  <div class="mt-4">
+                    <%= link_to "Start Onboarding", new_connected_account_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

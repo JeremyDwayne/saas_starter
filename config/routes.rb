@@ -34,7 +34,7 @@ Rails.application.routes.draw do
   delete "/settings/account", to: "settings#destroy_account", as: :destroy_account_settings
 
   # Organization routes
-  resources :organizations, only: [ :index, :new, :create, :show ] do
+  resources :organizations, only: [ :index, :new, :create, :show, :edit, :update ] do
     member do
       post :switch
     end

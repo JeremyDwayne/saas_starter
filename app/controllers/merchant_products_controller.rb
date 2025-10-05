@@ -3,18 +3,19 @@
 # Merchant Products Controller
 # Handles CRUD operations for merchant product catalog
 class MerchantProductsController < ApplicationController
+  before_action :require_organization_context
   before_action :require_subscription
   before_action :set_product, only: [ :show, :edit, :update, :destroy, :archive, :unarchive ]
 
   # GET /products
   def index
-    @products = Current.user.products
+    @products = Current.organization.merchant_products
                        .search(params[:query])
                        .recent
                        .limit(100)
 
-    @active_products = Current.user.products.active
-    @inactive_products = Current.user.products.inactive
+    @active_products = Current.organization.merchant_products.active
+    @inactive_products = Current.organization.merchant_products.inactive
   end
 
   # GET /products/:id
@@ -23,7 +24,7 @@ class MerchantProductsController < ApplicationController
 
   # GET /products/new
   def new
-    @product = Current.user.products.build
+    @product = Current.organization.merchant_products.build
   end
 
   # GET /products/:id/edit
@@ -32,7 +33,7 @@ class MerchantProductsController < ApplicationController
 
   # POST /products
   def create
-    @product = Current.user.products.build(product_params)
+    @product = Current.organization.merchant_products.build(product_params)
 
     if @product.save
       redirect_to products_path, notice: "Product created successfully."
@@ -75,7 +76,7 @@ class MerchantProductsController < ApplicationController
   private
 
   def set_product
-    @product = Current.user.products.find(params[:id])
+    @product = Current.organization.merchant_products.find(params[:id])
   end
 
   def product_params
@@ -90,7 +91,7 @@ class MerchantProductsController < ApplicationController
   end
 
   def require_subscription
-    unless Current.user.on_trial_or_subscribed?
+    unless Current.organization.on_trial_or_subscribed?
       redirect_to pricing_path, alert: "You need an active subscription to manage products."
     end
   end

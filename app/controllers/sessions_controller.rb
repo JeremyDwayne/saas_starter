@@ -27,7 +27,13 @@ class SessionsController < ApplicationController
         end
       end
 
-      redirect_to after_authentication_url
+      # Check if user needs to create their first organization
+      if user.organizations.none?
+        flash[:notice] = "Welcome back! Let's create your first organization to get started."
+        redirect_to new_organization_path
+      else
+        redirect_to after_authentication_url
+      end
     else
       redirect_to signin_path, alert: "Try another email address or password."
     end

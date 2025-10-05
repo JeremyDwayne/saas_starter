@@ -11,7 +11,12 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   test "create with valid credentials" do
     post signin_path, params: { email_address: @user.email_address, password: "password" }
 
-    assert_redirected_to root_path
+    # Redirect depends on whether user has organizations
+    if @user.organizations.any?
+      assert_redirected_to root_path
+    else
+      assert_redirected_to new_organization_path
+    end
     assert cookies[:session_id]
   end
 

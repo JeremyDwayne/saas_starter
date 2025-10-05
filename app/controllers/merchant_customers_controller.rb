@@ -3,12 +3,13 @@
 # Merchant Customers Controller
 # Handles CRUD operations for merchant customer management
 class MerchantCustomersController < ApplicationController
+  before_action :require_organization_context
   before_action :require_subscription
   before_action :set_customer, only: [ :show, :edit, :update, :destroy ]
 
   # GET /customers
   def index
-    @customers = Current.user.customers
+    @customers = Current.organization.merchant_customers
                         .search(params[:query])
                         .recent
                         .limit(100)
@@ -21,7 +22,7 @@ class MerchantCustomersController < ApplicationController
 
   # GET /customers/new
   def new
-    @customer = Current.user.customers.build(country: "US")
+    @customer = Current.organization.merchant_customers.build(country: "US")
   end
 
   # GET /customers/:id/edit
@@ -30,7 +31,7 @@ class MerchantCustomersController < ApplicationController
 
   # POST /customers
   def create
-    @customer = Current.user.customers.build(customer_params)
+    @customer = Current.organization.merchant_customers.build(customer_params)
 
     if @customer.save
       redirect_to customers_path, notice: "Customer created successfully."
@@ -61,7 +62,7 @@ class MerchantCustomersController < ApplicationController
   private
 
   def set_customer
-    @customer = Current.user.customers.find(params[:id])
+    @customer = Current.organization.merchant_customers.find(params[:id])
   end
 
   def customer_params
@@ -80,7 +81,7 @@ class MerchantCustomersController < ApplicationController
   end
 
   def require_subscription
-    unless Current.user.on_trial_or_subscribed?
+    unless Current.organization.on_trial_or_subscribed?
       redirect_to pricing_path, alert: "You need an active subscription to manage customers."
     end
   end

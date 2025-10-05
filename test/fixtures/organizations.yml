@@ -1,2 +1,11 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-# Organizations are created within tests as needed
+
+one:
+  name: Test Organization One
+  owner: one
+  slug: test-org-one
+
+two:
+  name: Test Organization Two
+  owner: two
+  slug: test-org-two

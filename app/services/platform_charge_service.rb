@@ -6,7 +6,7 @@ class PlatformChargeService
   class SubscriptionRequiredError < StandardError; end
 
   # Create a charge on a connected account with platform fee
-  # @param merchant [User] The merchant user
+  # @param merchant [User, Organization] The merchant (user or organization)
   # @param amount_cents [Integer] Charge amount in cents
   # @param customer_email [String] Customer's email address
   # @param description [String] Charge description (optional)
@@ -40,7 +40,7 @@ class PlatformChargeService
         receipt_email: @customer_email,
         metadata: @metadata.merge({
           merchant_id: @merchant.id,
-          merchant_email: @merchant.email,
+          merchant_name: merchant_identifier,
           platform_charge: true
         }),
         application_fee_amount: fee_calculation[:fee_cents]
@@ -81,7 +81,17 @@ class PlatformChargeService
   # Calculate fee using FeeCalculationService
   # @return [Hash] Fee calculation breakdown
   def calculate_fee
-    FeeCalculationService.calculate_for_user(@merchant, @amount_cents)
+    if @merchant.is_a?(Organization)
+      FeeCalculationService.calculate_for_organization(@merchant, @amount_cents)
+    else
+      FeeCalculationService.calculate_for_user(@merchant, @amount_cents)
+    end
+  end
+
+  # Get merchant identifier for metadata
+  # @return [String] Merchant identifier (email for users, name for organizations)
+  def merchant_identifier
+    @merchant.is_a?(Organization) ? @merchant.name : @merchant.email_address
   end
 
   # Record transaction in database

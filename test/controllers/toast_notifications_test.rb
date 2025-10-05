@@ -10,11 +10,11 @@ class ToastNotificationsTest < ActionDispatch::IntegrationTest
       }
     }
 
-    assert_redirected_to root_path
+    assert_redirected_to new_organization_path
     follow_redirect!
 
     # The flash message should be available for the toast system
-    assert_notice "Welcome! Your account has been created successfully."
+    assert_notice "Welcome! Let's create your first organization to get started."
   end
 
   test "failed signin shows alert toast" do

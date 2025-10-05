@@ -18,11 +18,11 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to new_organization_path
     assert cookies[:session_id]
 
     follow_redirect!
-    assert_notice "Welcome! Your account has been created successfully."
+    assert_notice "Welcome! Let's create your first organization to get started."
   end
 
   test "create with invalid email" do

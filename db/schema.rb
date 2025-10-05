@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_03_222629) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"
@@ -21,6 +21,84 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_03_222629) do
     t.string "user_id", null: false
     t.index [ "expires_at" ], name: "index_custom_platform_fees_on_expires_at"
     t.index [ "user_id" ], name: "index_custom_platform_fees_on_user_id", unique: true
+  end
+
+  create_table "merchant_customers", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.string "address_line1"
+    t.string "address_line2"
+    t.string "city"
+    t.string "country", default: "US"
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "name", null: false
+    t.text "notes"
+    t.string "phone"
+    t.string "postal_code"
+    t.string "state"
+    t.string "stripe_customer_id"
+    t.datetime "updated_at", null: false
+    t.string "user_id", null: false
+    t.index [ "stripe_customer_id" ], name: "index_merchant_customers_on_stripe_customer_id"
+    t.index [ "user_id", "email" ], name: "index_merchant_customers_on_user_id_and_email"
+    t.index [ "user_id" ], name: "index_merchant_customers_on_user_id"
+  end
+
+  create_table "merchant_invoice_items", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.string "invoice_id", null: false
+    t.string "product_id"
+    t.decimal "quantity", precision: 10, scale: 2, default: "1.0"
+    t.string "stripe_invoice_item_id"
+    t.integer "unit_price_cents", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "invoice_id" ], name: "index_merchant_invoice_items_on_invoice_id"
+    t.index [ "product_id" ], name: "index_merchant_invoice_items_on_product_id"
+    t.index [ "stripe_invoice_item_id" ], name: "index_merchant_invoice_items_on_stripe_invoice_item_id"
+  end
+
+  create_table "merchant_invoices", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.integer "application_fee_cents", default: 0
+    t.datetime "created_at", null: false
+    t.string "customer_id", null: false
+    t.integer "days_until_due", default: 30
+    t.date "due_date"
+    t.text "footer_text"
+    t.string "invoice_number", null: false
+    t.text "notes"
+    t.datetime "paid_at"
+    t.datetime "sent_at"
+    t.string "status", default: "draft"
+    t.string "stripe_invoice_id"
+    t.integer "subtotal_cents", default: 0
+    t.integer "tax_cents", default: 0
+    t.integer "total_cents", default: 0
+    t.datetime "updated_at", null: false
+    t.string "user_id", null: false
+    t.datetime "voided_at"
+    t.index [ "customer_id" ], name: "index_merchant_invoices_on_customer_id"
+    t.index [ "status" ], name: "index_merchant_invoices_on_status"
+    t.index [ "stripe_invoice_id" ], name: "index_merchant_invoices_on_stripe_invoice_id"
+    t.index [ "user_id", "invoice_number" ], name: "index_merchant_invoices_on_user_id_and_invoice_number", unique: true
+    t.index [ "user_id" ], name: "index_merchant_invoices_on_user_id"
+  end
+
+  create_table "merchant_products", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.integer "default_price_cents", null: false
+    t.text "description"
+    t.string "name", null: false
+    t.string "stripe_price_id"
+    t.string "stripe_product_id"
+    t.string "tax_code"
+    t.string "unit_type", default: "item"
+    t.datetime "updated_at", null: false
+    t.string "user_id", null: false
+    t.index [ "stripe_product_id" ], name: "index_merchant_products_on_stripe_product_id"
+    t.index [ "user_id", "active" ], name: "index_merchant_products_on_user_id_and_active"
+    t.index [ "user_id" ], name: "index_merchant_products_on_user_id"
   end
 
   create_table "omni_auth_identities", force: :cascade do |t|

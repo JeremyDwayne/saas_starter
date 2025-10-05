@@ -9,6 +9,9 @@ class User < ApplicationRecord
   has_many :generated_rewards, class_name: "ReferralReward", foreign_key: "referee_id", dependent: :destroy
   has_one :custom_platform_fee, dependent: :destroy
   has_many :platform_transactions, foreign_key: "merchant_id", dependent: :destroy
+  has_many :customers, class_name: "MerchantCustomer", dependent: :destroy
+  has_many :products, class_name: "MerchantProduct", dependent: :destroy
+  has_many :invoices, class_name: "MerchantInvoice", dependent: :destroy
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
   pay_merchant

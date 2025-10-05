@@ -1,6 +1,8 @@
 class ApplicationController < ActionController::Base
   set_referral_cookie
   include Authentication
+  include OrganizationContext
+  include OrganizationAuthorization
 
   # Debug method to check referral cookie setting (development only)
   after_action :log_referral_cookie, if: -> { Rails.env.development? && params[:ref].present? }
@@ -9,10 +11,18 @@ class ApplicationController < ActionController::Base
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
-  helper_method :current_user
+  helper_method :current_user, :current_organization, :current_membership
 
   def current_user
     Current.user
+  end
+
+  def current_organization
+    Current.organization
+  end
+
+  def current_membership
+    Current.membership
   end
 
   private

@@ -1,0 +1,66 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Your Organizations</h1>
+      <p class="mt-2 text-sm text-gray-600">Manage and switch between your organizations</p>
+    </div>
+    <%= link_to "Create Organization", new_organization_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+  </div>
+
+  <% if @organizations.any? %>
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+      <ul role="list" class="divide-y divide-gray-200">
+        <% @organizations.each do |organization| %>
+          <li>
+            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+              <div class="flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                  <%= link_to organization, class: "block" do %>
+                    <p class="text-lg font-medium text-indigo-600 truncate">
+                      <%= organization.name %>
+                    </p>
+                    <p class="text-sm text-gray-500 mt-1">
+                      <% if organization.owner_id == current_user.id %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Owner
+                        </span>
+                      <% else %>
+                        <% membership = current_user.organization_memberships.find_by(organization: organization) %>
+                        <% if membership %>
+                          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            <%= membership.role.to_s.titleize %>
+                          </span>
+                        <% end %>
+                      <% end %>
+                    </p>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                  <% if current_organization&.id == organization.id %>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                      Current
+                    </span>
+                  <% else %>
+                    <%= button_to "Switch", switch_organization_path(organization), method: :post, class: "inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+    <div class="text-center py-12 bg-white rounded-lg shadow">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No organizations</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating a new organization.</p>
+      <div class="mt-6">
+        <%= link_to "Create Organization", new_organization_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+      </div>
+    </div>
+  <% end %>
+</div>

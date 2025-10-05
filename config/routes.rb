@@ -33,6 +33,13 @@ Rails.application.routes.draw do
   patch "/settings/password", to: "settings#update_password", as: :update_password_settings
   delete "/settings/account", to: "settings#destroy_account", as: :destroy_account_settings
 
+  # Organization routes
+  resources :organizations, only: [ :index, :new, :create, :show ] do
+    member do
+      post :switch
+    end
+  end
+
   # Pay routes are automatically mounted by the gem
 
   # Subscription routes

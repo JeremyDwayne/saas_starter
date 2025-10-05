@@ -1,6 +1,6 @@
 # Rails SaaS Starter
 
-> A production-ready Rails 8.1 SaaS starter kit with authentication, payments, referrals, and admin dashboard.
+> A production-ready Rails 8.1 multi-tenant SaaS starter kit with organization management, authentication, payments, referrals, and admin dashboard.
 
 [![Rails](https://img.shields.io/badge/Rails-8.1%20beta-red.svg)](https://rubyonrails.org/)
 [![Ruby](https://img.shields.io/badge/Ruby-3.4.5-red.svg)](https://www.ruby-lang.org/)
@@ -8,11 +8,21 @@
 
 ## 🚀 Features
 
+- **🏢 Multi-Tenancy & Organizations**
+  - Complete B2B multi-tenant architecture
+  - Organization-based data isolation
+  - Team member management with role-based permissions
+  - Email invitations with automated onboarding
+  - Organization switcher in navigation
+  - Admin-only organization settings
+  - Seamless context switching between organizations
+
 - **🔐 Authentication System**
   - Session-based authentication with secure password handling
   - OAuth integration (Google & GitHub)
   - Password reset flow with time-limited tokens
   - Multi-session management with device tracking
+  - First-time user onboarding flow
 
 - **💳 Payment Processing**
   - Stripe integration via Pay gem
@@ -20,10 +30,12 @@
   - Automated billing and invoice generation
   - PDF receipt generation
   - **Stripe Connect for marketplace payments**
+    - Organization-level merchant accounts
     - Direct charges to connected accounts
     - Subscription-tiered platform fees
     - Custom fee overrides for enterprise customers
     - Real-time fee calculations
+    - Express Dashboard access for merchants
 
 - **🎁 Referral System**
   - Automatic referral tracking with unique codes
@@ -39,6 +51,7 @@
 - **🎛️ Admin Dashboard**
   - Madmin-powered admin interface
   - User, session, and subscription management
+  - Organization and membership oversight
   - Referral reward tracking
   - Platform fee configuration management
   - Transaction and merchant account oversight
@@ -137,32 +150,36 @@ Run specific test file:
 bin/rails test test/models/user_test.rb
 ```
 
-Run system tests:
-
-```bash
-bin/rails test:system
-```
-
 ## 📁 Project Structure
 
 ```
 ├── app/
 │   ├── controllers/
 │   │   ├── concerns/
-│   │   │   └── authentication.rb      # Authentication logic
+│   │   │   ├── authentication.rb      # Authentication logic
+│   │   │   └── organization_context.rb # Multi-tenancy context
 │   │   ├── sessions_controller.rb     # Login/logout
 │   │   ├── passwords_controller.rb    # Password reset
+│   │   ├── organizations_controller.rb # Organization CRUD
+│   │   ├── organization_members_controller.rb # Team management
+│   │   ├── organization_invitations_controller.rb # Invites
 │   │   ├── subscriptions_controller.rb # Payment flows
 │   │   ├── settings_controller.rb     # User settings
 │   │   ├── connected_accounts_controller.rb # Stripe Connect onboarding
-│   │   └── platform_charges_controller.rb   # Marketplace payments
+│   │   ├── platform_charges_controller.rb   # Marketplace payments
+│   │   ├── merchant_products_controller.rb  # Product catalog
+│   │   ├── merchant_customers_controller.rb # Customer management
+│   │   └── merchant_invoices_controller.rb  # Invoicing
 │   ├── models/
 │   │   ├── current.rb                 # Request-scoped data
 │   │   ├── user.rb                    # User model
 │   │   ├── session.rb                 # Session tracking
+│   │   ├── organization.rb            # Organization model
+│   │   ├── organization_membership.rb # Team memberships
+│   │   ├── organization_invitation.rb # Email invitations
 │   │   ├── role.rb                    # RBAC roles
 │   │   ├── platform_fee_configuration.rb # Tier-based fees
-│   │   ├── custom_platform_fee.rb     # User-specific fees
+│   │   ├── custom_platform_fee.rb     # Organization-specific fees
 │   │   └── platform_transaction.rb    # Payment transactions
 │   ├── services/
 │   │   ├── referral_reward_service.rb # Reward processing
@@ -208,6 +225,58 @@ class PublicController < ApplicationController
 end
 ```
 
+### Organizations & Multi-Tenancy
+
+The application is built with a complete B2B multi-tenant architecture where all business data is scoped to organizations:
+
+```ruby
+# Access current organization context
+Current.organization           # => Organization instance
+Current.membership            # => OrganizationMembership instance
+
+# Organization management
+user.organizations            # All organizations user belongs to
+user.owned_organizations      # Organizations where user is owner
+
+# Create organization (auto-creates admin membership)
+organization = Organization.create!(name: "Acme Corp", owner: user)
+
+# Check membership and role
+membership = user.organization_memberships.find_by(organization: organization)
+membership.admin?             # => true/false
+membership.member?            # => true/false
+
+# Organization-scoped data access
+organization.merchant_products
+organization.merchant_customers
+organization.merchant_invoices
+organization.platform_transactions
+
+# Invite team members
+invitation = organization.organization_invitations.create!(
+  email: "teammate@example.com",
+  role: "member",
+  invited_by: current_user
+)
+
+# Manage team members
+membership.update(role: "admin")
+membership.destroy  # Remove from organization
+```
+
+**Organization Features:**
+- **Context Switching**: Users can switch between organizations via navbar dropdown
+- **Data Isolation**: All business data is strictly scoped to organizations
+- **Team Management**: Add/remove members, update roles (admin/member)
+- **Email Invitations**: Send invites with automatic onboarding flow
+- **Settings Management**: Admin-only access to organization settings
+- **Onboarding**: New users are prompted to create their first organization
+
+**Organization Settings Tabs:**
+- **General**: Update organization name and slug
+- **Billing**: Manage subscription via Stripe billing portal
+- **Stripe Connect**: Onboard merchant account, view status and fees
+
 ### RBAC System
 
 Manage user roles and permissions:
@@ -231,18 +300,21 @@ user.remove_role(:moderator)
 
 ### Payment Processing
 
-Subscription management with Stripe:
+Subscription management with Stripe (available on both User and Organization):
 
 ```ruby
-# Check subscription status
-user.subscribed?              # => true/false
-user.on_trial?                # => true/false
-user.on_trial_or_subscribed?  # => true/false
+# Check subscription status (organization-level)
+organization.subscribed?              # => true/false
+organization.on_trial?                # => true/false
+organization.on_trial_or_subscribed?  # => true/false
 
 # Get subscription details
-subscription = user.subscription
+subscription = organization.subscription
 subscription.active?          # => true/false
 subscription.on_trial?        # => true/false
+
+# Legacy user-level access still supported
+user.subscribed?              # => true/false
 ```
 
 ### Referral System
@@ -267,18 +339,18 @@ config.credit_expiry_days     # Days until credits expire
 
 ### Stripe Connect (Marketplace Payments)
 
-Enable users to accept payments directly from their customers with subscription-tiered platform fees:
+Enable organizations to accept payments directly from their customers with subscription-tiered platform fees:
 
 ```ruby
-# Check if user can accept payments
-user.merchant_onboarding_complete?  # => true/false
-user.can_accept_payments?           # => true/false
+# Check if organization can accept payments
+organization.merchant_onboarding_complete?  # => true/false
+organization.can_accept_payments?           # => true/false
 
-# Get platform fee percentage
-user.platform_fee_percentage        # => 5.0 (percentage)
+# Get platform fee percentage for organization
+organization.platform_fee_percentage        # => 5.0 (percentage)
 
 # Calculate fees for a charge
-fee_calculation = FeeCalculationService.calculate_for_user(user, 10000)
+fee_calculation = FeeCalculationService.calculate_for_organization(organization, 10000)
 # => {
 #   amount_cents: 10000,
 #   fee_cents: 500,
@@ -289,7 +361,7 @@ fee_calculation = FeeCalculationService.calculate_for_user(user, 10000)
 
 # Create a charge on a connected account
 result = PlatformChargeService.create_charge(
-  merchant: user,
+  merchant: organization,
   amount_cents: 10000,
   customer_email: "customer@example.com",
   description: "Product purchase",
@@ -298,10 +370,10 @@ result = PlatformChargeService.create_charge(
 ```
 
 **Platform Fee Tiers** (configurable in admin):
-- Personal: 7% (default for users without subscription)
+- Personal: 7% (default for organizations without subscription)
 - Professional: 5%
 - Enterprise: 3%
-- Custom: Negotiated rates for specific users
+- Custom: Negotiated rates for specific organizations
 
 **Features:**
 - Direct charges - customers see merchant's business name
@@ -387,12 +459,14 @@ Configure these in your production environment:
 Access the admin dashboard at `/madmin` (requires admin role):
 
 - Manage users and sessions
-- View subscription details
+- Organization and membership oversight
+- View subscription details (organization-level)
 - Track referral rewards
 - Monitor OAuth identities
 - Configure platform fee tiers
-- Manage custom fee overrides
+- Manage custom fee overrides for organizations
 - View and analyze platform transactions
+- Monitor organization invitations
 
 ## 🔧 Development Commands
 

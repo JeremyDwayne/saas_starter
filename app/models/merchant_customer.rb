@@ -5,7 +5,7 @@
 class MerchantCustomer < ApplicationRecord
   # Associations
   belongs_to :user
-  belongs_to :organization, optional: true
+  belongs_to :organization
   has_many :invoices, class_name: "MerchantInvoice", foreign_key: "customer_id", dependent: :restrict_with_error
 
   # Validations

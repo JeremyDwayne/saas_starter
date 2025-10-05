@@ -3,6 +3,8 @@ require "test_helper"
 class ConnectedAccountWebhookJobTest < ActiveJob::TestCase
   setup do
     @user = users(:one)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
   end
 
   test "should handle account.updated event" do
@@ -14,6 +16,7 @@ class ConnectedAccountWebhookJobTest < ActiveJob::TestCase
     # Create a test transaction
     transaction = PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_succeeded",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -42,6 +45,7 @@ class ConnectedAccountWebhookJobTest < ActiveJob::TestCase
     # Create a test transaction
     transaction = PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_refunded",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -71,6 +75,7 @@ class ConnectedAccountWebhookJobTest < ActiveJob::TestCase
     # Create a test transaction
     transaction = PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_partial",
       charge_amount_cents: 10000,
       application_fee_cents: 500,

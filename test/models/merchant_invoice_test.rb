@@ -3,8 +3,27 @@ require "test_helper"
 class MerchantInvoiceTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
-    @customer = merchant_customers(:one)
-    @invoice = merchant_invoices(:draft_invoice)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
+    @customer = MerchantCustomer.create!(
+      user: @user,
+      organization: @organization,
+      name: "Acme Corporation",
+      email: "billing@acme.com",
+      country: "US"
+    )
+    @invoice = MerchantInvoice.create!(
+      user: @user,
+      organization: @organization,
+      customer: @customer,
+      invoice_number: "000001",
+      status: "draft",
+      subtotal_cents: 15000,
+      tax_cents: 0,
+      total_cents: 15000,
+      application_fee_cents: 0,
+      days_until_due: 30
+    )
   end
 
   test "valid invoice" do
@@ -17,6 +36,7 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
 
     invoice = MerchantInvoice.new(
       user: @user,
+      organization: @organization,
       customer: @customer,
       status: "draft",
       days_until_due: 30
@@ -34,6 +54,7 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
 
     invoice1 = MerchantInvoice.create!(
       user: @user,
+      organization: @organization,
       customer: @customer,
       status: "draft",
       days_until_due: 30
@@ -41,6 +62,7 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
 
     invoice2 = MerchantInvoice.create!(
       user: @user,
+      organization: @organization,
       customer: @customer,
       status: "draft",
       days_until_due: 30
@@ -139,7 +161,18 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
 
   test "draft scope returns only draft invoices" do
     draft = @invoice
-    open_invoice = merchant_invoices(:open_invoice)
+    open_invoice = MerchantInvoice.create!(
+      user: @user,
+      organization: @organization,
+      customer: @customer,
+      invoice_number: "000002",
+      status: "open",
+      subtotal_cents: 50000,
+      tax_cents: 0,
+      total_cents: 50000,
+      application_fee_cents: 2500,
+      days_until_due: 30
+    )
 
     results = MerchantInvoice.draft
     assert_includes results, draft
@@ -147,7 +180,18 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
   end
 
   test "open scope returns only open invoices" do
-    open_invoice = merchant_invoices(:open_invoice)
+    open_invoice = MerchantInvoice.create!(
+      user: @user,
+      organization: @organization,
+      customer: @customer,
+      invoice_number: "000002",
+      status: "open",
+      subtotal_cents: 50000,
+      tax_cents: 0,
+      total_cents: 50000,
+      application_fee_cents: 2500,
+      days_until_due: 30
+    )
     draft = @invoice
 
     results = MerchantInvoice.open
@@ -157,8 +201,30 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
 
   test "unpaid scope returns draft and open invoices" do
     draft = @invoice
-    open_invoice = merchant_invoices(:open_invoice)
-    paid_invoice = merchant_invoices(:paid_invoice)
+    open_invoice = MerchantInvoice.create!(
+      user: @user,
+      organization: @organization,
+      customer: @customer,
+      invoice_number: "000002",
+      status: "open",
+      subtotal_cents: 50000,
+      tax_cents: 0,
+      total_cents: 50000,
+      application_fee_cents: 2500,
+      days_until_due: 30
+    )
+    paid_invoice = MerchantInvoice.create!(
+      user: @user,
+      organization: @organization,
+      customer: @customer,
+      invoice_number: "000003",
+      status: "paid",
+      subtotal_cents: 75000,
+      tax_cents: 0,
+      total_cents: 75000,
+      application_fee_cents: 3750,
+      days_until_due: 30
+    )
 
     results = MerchantInvoice.unpaid
     assert_includes results, draft

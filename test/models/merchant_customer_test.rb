@@ -3,7 +3,15 @@ require "test_helper"
 class MerchantCustomerTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
-    @customer = merchant_customers(:one)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
+    @customer = MerchantCustomer.create!(
+      user: @user,
+      organization: @organization,
+      name: "Acme Corporation",
+      email: "billing@acme.com",
+      country: "US"
+    )
   end
 
   test "valid customer" do
@@ -31,6 +39,7 @@ class MerchantCustomerTest < ActiveSupport::TestCase
   test "full_address formats address correctly" do
     customer = MerchantCustomer.new(
       user: @user,
+      organization: @organization,
       name: "Test Customer",
       email: "test@example.com",
       address_line1: "123 Main St",
@@ -48,6 +57,7 @@ class MerchantCustomerTest < ActiveSupport::TestCase
   test "full_address handles missing fields" do
     customer = MerchantCustomer.new(
       user: @user,
+      organization: @organization,
       name: "Test Customer",
       email: "test@example.com",
       address_line1: "123 Main St",
@@ -72,6 +82,7 @@ class MerchantCustomerTest < ActiveSupport::TestCase
   test "recent scope orders by created_at desc" do
     older = MerchantCustomer.create!(
       user: @user,
+      organization: @organization,
       name: "Older Customer",
       email: "older@example.com",
       country: "US"
@@ -79,6 +90,7 @@ class MerchantCustomerTest < ActiveSupport::TestCase
 
     newer = MerchantCustomer.create!(
       user: @user,
+      organization: @organization,
       name: "Newer Customer",
       email: "newer@example.com",
       country: "US"

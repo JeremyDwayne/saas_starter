@@ -129,9 +129,11 @@ class UserTest < ActiveSupport::TestCase
   # Platform fee tests
   test "platform_fee_percentage should use custom fee when active" do
     user = User.create!(email_address: "test5@example.com", password: "password123")
+    org = Organization.create!(owner: user, name: "Test Organization")
 
     CustomPlatformFee.create!(
       user: user,
+      organization: org,
       fee_percentage: 2.5,
       expires_at: Date.tomorrow
     )
@@ -158,9 +160,11 @@ class UserTest < ActiveSupport::TestCase
 
   test "calculate_platform_fee should use custom fee calculation when active" do
     user = User.create!(email_address: "test8@example.com", password: "password123")
+    org = Organization.create!(owner: user, name: "Test Organization")
 
     CustomPlatformFee.create!(
       user: user,
+      organization: org,
       fee_percentage: 3.0
     )
 
@@ -205,9 +209,11 @@ class UserTest < ActiveSupport::TestCase
 
   test "should have custom_platform_fee association" do
     user = User.create!(email_address: "test14@example.com", password: "password123")
+    org = Organization.create!(owner: user, name: "Test Organization")
 
     custom_fee = CustomPlatformFee.create!(
       user: user,
+      organization: org,
       fee_percentage: 3.5
     )
 
@@ -216,9 +222,11 @@ class UserTest < ActiveSupport::TestCase
 
   test "should have platform_transactions association" do
     user = User.create!(email_address: "test15@example.com", password: "password123")
+    org = Organization.create!(owner: user, name: "Test Organization")
 
     transaction = PlatformTransaction.create!(
       merchant: user,
+      organization: org,
       stripe_charge_id: "ch_test_assoc",
       charge_amount_cents: 5000,
       application_fee_cents: 250,

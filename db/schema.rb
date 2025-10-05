@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_05_195619) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_05_201032) do
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"
     t.decimal "fee_percentage", precision: 5, scale: 2, null: false
     t.integer "minimum_fee_cents"
     t.string "notes"
-    t.string "organization_id"
+    t.string "organization_id", null: false
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
     t.index [ "expires_at" ], name: "index_custom_platform_fees_on_expires_at"
@@ -48,7 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_195619) do
     t.string "email", null: false
     t.string "name", null: false
     t.text "notes"
-    t.string "organization_id"
+    t.string "organization_id", null: false
     t.string "phone"
     t.string "postal_code"
     t.string "state"
@@ -85,7 +85,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_195619) do
     t.text "footer_text"
     t.string "invoice_number", null: false
     t.text "notes"
-    t.string "organization_id"
+    t.string "organization_id", null: false
     t.datetime "paid_at"
     t.datetime "sent_at"
     t.string "status", default: "draft"
@@ -110,7 +110,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_195619) do
     t.integer "default_price_cents", null: false
     t.text "description"
     t.string "name", null: false
-    t.string "organization_id"
+    t.string "organization_id", null: false
     t.string "stripe_price_id"
     t.string "stripe_product_id"
     t.string "tax_code"
@@ -284,7 +284,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_195619) do
     t.decimal "fee_percentage_applied", precision: 5, scale: 2
     t.string "merchant_id", null: false
     t.json "metadata"
-    t.string "organization_id"
+    t.string "organization_id", null: false
     t.string "status", default: "succeeded"
     t.string "stripe_charge_id", null: false
     t.datetime "updated_at", null: false

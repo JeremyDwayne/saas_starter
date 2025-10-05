@@ -3,8 +3,11 @@ require "test_helper"
 class PlatformTransactionTest < ActiveSupport::TestCase
   def setup
     @merchant = users(:one)
+    @organization = Organization.create!(owner: @merchant, name: "Test Organization")
+    OrganizationMembership.create!(user: @merchant, organization: @organization, role: :admin)
     @transaction = PlatformTransaction.new(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_12345",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -33,8 +36,11 @@ class PlatformTransactionTest < ActiveSupport::TestCase
 
   test "should validate stripe_charge_id uniqueness" do
     @transaction.save!
+    other_user = users(:two)
+    other_org = Organization.create!(owner: other_user, name: "Other Organization")
     duplicate = PlatformTransaction.new(
-      merchant: users(:two),
+      merchant: other_user,
+      organization: other_org,
       stripe_charge_id: "ch_test_12345",
       charge_amount_cents: 5000,
       application_fee_cents: 250,
@@ -112,6 +118,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
 
     refunded_transaction = PlatformTransaction.create!(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_67890",
       charge_amount_cents: 5000,
       application_fee_cents: 250,
@@ -126,6 +133,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
   test "refunded scope should return only refunded transactions" do
     succeeded_transaction = PlatformTransaction.create!(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_11111",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -135,6 +143,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
 
     refunded_transaction = PlatformTransaction.create!(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_22222",
       charge_amount_cents: 5000,
       application_fee_cents: 250,
@@ -148,11 +157,13 @@ class PlatformTransactionTest < ActiveSupport::TestCase
 
   test "for_merchant scope should return transactions for specific merchant" do
     merchant_two = users(:two)
+    org_two = Organization.create!(owner: merchant_two, name: "Second Organization")
 
     @transaction.save!
 
     other_transaction = PlatformTransaction.create!(
       merchant: merchant_two,
+      organization: org_two,
       stripe_charge_id: "ch_test_other",
       charge_amount_cents: 3000,
       application_fee_cents: 150,
@@ -169,6 +180,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
   test "recent scope should order by created_at desc" do
     first_transaction = PlatformTransaction.create!(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_first",
       charge_amount_cents: 1000,
       application_fee_cents: 50,
@@ -179,6 +191,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
 
     second_transaction = PlatformTransaction.create!(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_second",
       charge_amount_cents: 2000,
       application_fee_cents: 100,
@@ -266,6 +279,7 @@ class PlatformTransactionTest < ActiveSupport::TestCase
   test "should default status to succeeded" do
     transaction = PlatformTransaction.new(
       merchant: @merchant,
+      organization: @organization,
       stripe_charge_id: "ch_test_default",
       charge_amount_cents: 1000,
       application_fee_cents: 50,

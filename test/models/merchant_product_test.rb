@@ -3,7 +3,17 @@ require "test_helper"
 class MerchantProductTest < ActiveSupport::TestCase
   setup do
     @user = users(:one)
-    @product = merchant_products(:consulting)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
+    @product = MerchantProduct.create!(
+      user: @user,
+      organization: @organization,
+      name: "Consulting Services",
+      description: "Expert consulting on web development",
+      default_price_cents: 15000,
+      unit_type: "hour",
+      active: true
+    )
   end
 
   test "valid product" do
@@ -69,8 +79,14 @@ class MerchantProductTest < ActiveSupport::TestCase
 
   test "active scope returns only active products" do
     active_product = @product
-    inactive_product = merchant_products(:archived_service)
-    inactive_product.update(active: false)
+    inactive_product = MerchantProduct.create!(
+      user: @user,
+      organization: @organization,
+      name: "Old Service",
+      default_price_cents: 10000,
+      unit_type: "item",
+      active: false
+    )
 
     results = MerchantProduct.active
     assert_includes results, active_product
@@ -79,8 +95,14 @@ class MerchantProductTest < ActiveSupport::TestCase
 
   test "inactive scope returns only inactive products" do
     active_product = @product
-    inactive_product = merchant_products(:archived_service)
-    inactive_product.update(active: false)
+    inactive_product = MerchantProduct.create!(
+      user: @user,
+      organization: @organization,
+      name: "Old Service",
+      default_price_cents: 10000,
+      unit_type: "item",
+      active: false
+    )
 
     results = MerchantProduct.inactive
     assert_includes results, inactive_product

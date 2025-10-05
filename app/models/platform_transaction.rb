@@ -2,7 +2,7 @@
 # Tracks all Stripe Connect charges and application fees
 class PlatformTransaction < ApplicationRecord
   belongs_to :merchant, class_name: "User", foreign_key: "merchant_id"
-  belongs_to :organization, optional: true
+  belongs_to :organization
 
   validates :stripe_charge_id, presence: true, uniqueness: true
   validates :charge_amount_cents, presence: true, numericality: { greater_than: 0 }

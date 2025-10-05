@@ -3,8 +3,11 @@ require "test_helper"
 class CustomPlatformFeeTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
     @custom_fee = CustomPlatformFee.new(
       user: @user,
+      organization: @organization,
       fee_percentage: 3.5,
       notes: "Negotiated rate for large customer"
     )
@@ -53,6 +56,7 @@ class CustomPlatformFeeTest < ActiveSupport::TestCase
     @custom_fee.save!
     duplicate = CustomPlatformFee.new(
       user: @user,
+      organization: @organization,
       fee_percentage: 2.0
     )
     assert_not duplicate.valid?
@@ -62,13 +66,16 @@ class CustomPlatformFeeTest < ActiveSupport::TestCase
   test "active scope should return only non-expired fees" do
     active_fee = CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 3.0,
       expires_at: Date.tomorrow
     )
 
     user_two = users(:two)
+    org_two = Organization.create!(owner: user_two, name: "Second Organization")
     expired_fee = CustomPlatformFee.create!(
       user: user_two,
+      organization: org_two,
       fee_percentage: 2.0,
       expires_at: Date.yesterday
     )
@@ -80,6 +87,7 @@ class CustomPlatformFeeTest < ActiveSupport::TestCase
   test "active scope should include fees with no expiration" do
     permanent_fee = CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 4.0,
       expires_at: nil
     )

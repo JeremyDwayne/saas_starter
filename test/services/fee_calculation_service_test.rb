@@ -3,6 +3,8 @@ require "test_helper"
 class FeeCalculationServiceTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
   end
 
   test "calculate_for_user should return fee breakdown hash" do
@@ -19,6 +21,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
   test "should calculate with custom fee when present" do
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 3.5,
       expires_at: Date.tomorrow
     )
@@ -61,6 +64,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
   test "should calculate correctly for different amounts" do
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 4.0
     )
 
@@ -78,6 +82,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
   test "should respect minimum fee when set" do
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 3.0,
       minimum_fee_cents: 500 # $5.00 minimum
     )
@@ -100,6 +105,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
 
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 2.0,
       expires_at: Date.yesterday # Expired
     )
@@ -122,6 +128,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
   test "should round fee calculations correctly" do
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 3.33
     )
 
@@ -135,6 +142,7 @@ class FeeCalculationServiceTest < ActiveSupport::TestCase
   test "fee_source should be custom when active custom fee exists" do
     CustomPlatformFee.create!(
       user: @user,
+      organization: @organization,
       fee_percentage: 2.5
     )
 

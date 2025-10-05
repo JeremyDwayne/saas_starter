@@ -3,6 +3,8 @@ require "test_helper"
 class PlatformChargesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
+    @organization = Organization.create!(owner: @user, name: "Test Organization")
+    OrganizationMembership.create!(user: @user, organization: @organization, role: :admin)
     sign_in @user
   end
 
@@ -50,6 +52,7 @@ class PlatformChargesControllerTest < ActionDispatch::IntegrationTest
     # Create some test transactions
     PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_1",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -59,6 +62,7 @@ class PlatformChargesControllerTest < ActionDispatch::IntegrationTest
 
     PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_2",
       charge_amount_cents: 5000,
       application_fee_cents: 250,
@@ -73,6 +77,7 @@ class PlatformChargesControllerTest < ActionDispatch::IntegrationTest
   test "should show individual transaction" do
     transaction = PlatformTransaction.create!(
       merchant: @user,
+      organization: @organization,
       stripe_charge_id: "ch_test_show",
       charge_amount_cents: 10000,
       application_fee_cents: 500,
@@ -87,8 +92,10 @@ class PlatformChargesControllerTest < ActionDispatch::IntegrationTest
 
   test "should only show own transactions" do
     other_user = users(:two)
+    other_org = Organization.create!(owner: other_user, name: "Other Organization")
     other_transaction = PlatformTransaction.create!(
       merchant: other_user,
+      organization: other_org,
       stripe_charge_id: "ch_test_other",
       charge_amount_cents: 5000,
       application_fee_cents: 250,

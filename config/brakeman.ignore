@@ -3,6 +3,29 @@
     {
       "warning_type": "Redirect",
       "warning_code": 18,
+      "fingerprint": "1829d5be31efb772360b57038c3a861472731684c972d286b23e18ce75893bd7",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/connected_accounts_controller.rb",
+      "line": 59,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.organization.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url, :allow_other_host => true, :status => :see_other)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ConnectedAccountsController",
+        "method": "refresh"
+      },
+      "user_input": "Current.organization.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
       "fingerprint": "4a25ca6197b358e0e22f095839c291f719baea3ad580ea5815e2bf7244b707e7",
       "check_name": "Redirect",
       "message": "Possible unprotected redirect",
@@ -26,66 +49,43 @@
     {
       "warning_type": "Redirect",
       "warning_code": 18,
-      "fingerprint": "6f4724879cf824c410a23e037667cb037708164a525dcd6b5605495825f6a8cb",
+      "fingerprint": "8ed602c62eef976d8f9f5dc29f9f690ab2ea8e74e8045f939cdc8c154668a597",
       "check_name": "Redirect",
       "message": "Possible unprotected redirect",
       "file": "app/controllers/connected_accounts_controller.rb",
-      "line": 73,
+      "line": 30,
       "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(Current.user.merchant_processor.login_link.url, :allow_other_host => true, :status => :see_other)",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ConnectedAccountsController",
-        "method": "dashboard"
-      },
-      "user_input": "Current.user.merchant_processor.login_link.url",
-      "confidence": "Weak",
-      "cwe_id": [
-        601
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "92c3cd94c9cf2f94f25e7f1c805ea39224e78f6f3d3dacaa01bbbd1909ec86ba",
-      "check_name": "Redirect",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/connected_accounts_controller.rb",
-      "line": 58,
-      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url, :allow_other_host => true, :status => :see_other)",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "ConnectedAccountsController",
-        "method": "refresh"
-      },
-      "user_input": "Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url",
-      "confidence": "Weak",
-      "cwe_id": [
-        601
-      ],
-      "note": ""
-    },
-    {
-      "warning_type": "Redirect",
-      "warning_code": 18,
-      "fingerprint": "9bd73017482f056034501544cac71271e6512a797360018137673c9f82100a55",
-      "check_name": "Redirect",
-      "message": "Possible unprotected redirect",
-      "file": "app/controllers/connected_accounts_controller.rb",
-      "line": 29,
-      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
-      "code": "redirect_to(Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url, :allow_other_host => true, :status => :see_other)",
+      "code": "redirect_to(Current.organization.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url, :allow_other_host => true, :status => :see_other)",
       "render_path": null,
       "location": {
         "type": "method",
         "class": "ConnectedAccountsController",
         "method": "create"
       },
-      "user_input": "Current.user.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url",
+      "user_input": "Current.organization.merchant_processor.account_link(:refresh_url => refresh_connected_account_url, :return_url => return_connected_account_url).url",
+      "confidence": "Weak",
+      "cwe_id": [
+        601
+      ],
+      "note": ""
+    },
+    {
+      "warning_type": "Redirect",
+      "warning_code": 18,
+      "fingerprint": "bd51ff8d14dcfa36e269762ec7d4afe380eeb06f8fe8f1ed5d8a5d986bbfd6b6",
+      "check_name": "Redirect",
+      "message": "Possible unprotected redirect",
+      "file": "app/controllers/connected_accounts_controller.rb",
+      "line": 74,
+      "link": "https://brakemanscanner.org/docs/warning_types/redirect/",
+      "code": "redirect_to(Current.organization.merchant_processor.login_link.url, :allow_other_host => true, :status => :see_other)",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "ConnectedAccountsController",
+        "method": "dashboard"
+      },
+      "user_input": "Current.organization.merchant_processor.login_link.url",
       "confidence": "Weak",
       "cwe_id": [
         601

@@ -57,6 +57,24 @@ Rails.application.routes.draw do
   # Platform charges (for businesses)
   resources :charges, controller: "platform_charges", only: [ :new, :create, :index, :show ]
 
+  # Invoicing routes
+  resources :products, controller: "merchant_products" do
+    member do
+      patch :archive
+      patch :unarchive
+    end
+  end
+
+  resources :customers, controller: "merchant_customers"
+
+  resources :invoices, controller: "merchant_invoices" do
+    member do
+      post :send_invoice
+      post :mark_paid
+      post :void
+    end
+  end
+
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker

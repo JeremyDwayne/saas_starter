@@ -16,7 +16,11 @@ class OrganizationMembersController < ApplicationController
       return
     end
 
-    if @membership.update(membership_params)
+    # Validate and set role explicitly
+    new_role = validated_role(params[:organization_membership][:role])
+    @membership.role = new_role
+
+    if @membership.save
       redirect_to organization_members_path(@organization), notice: "Member role updated successfully."
     else
       redirect_to organization_members_path(@organization), alert: "Failed to update member role."
@@ -50,7 +54,13 @@ class OrganizationMembersController < ApplicationController
     @membership = @organization.organization_memberships.find(params[:id])
   end
 
-  def membership_params
-    params.require(:organization_membership).permit(:role)
+  # Validate and return a safe role value
+  def validated_role(role_param)
+    allowed_roles = OrganizationMembership.roles.keys
+    if role_param.present? && allowed_roles.include?(role_param)
+      role_param
+    else
+      @membership.role # Keep existing role if invalid value provided
+    end
   end
 end

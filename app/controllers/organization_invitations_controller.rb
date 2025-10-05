@@ -19,6 +19,9 @@ class OrganizationInvitationsController < ApplicationController
     @invitation = @organization.organization_invitations.build(invitation_params)
     @invitation.invited_by = current_user
 
+    # Set role with validation
+    @invitation.role = validated_role(params[:organization_invitation][:role])
+
     # Check if user is already a member
     if @organization.users.exists?(email_address: @invitation.email)
       redirect_to organization_invitations_path(@organization), alert: "This user is already a member of the organization."
@@ -86,7 +89,17 @@ class OrganizationInvitationsController < ApplicationController
   end
 
   def invitation_params
-    params.require(:organization_invitation).permit(:email, :role)
+    params.require(:organization_invitation).permit(:email)
+  end
+
+  # Validate and return a safe role value
+  def validated_role(role_param)
+    allowed_roles = OrganizationMembership.roles.keys
+    if role_param.present? && allowed_roles.include?(role_param)
+      role_param
+    else
+      "member" # Default to member if invalid or missing
+    end
   end
 
   def accept_invitation_for_user(user)

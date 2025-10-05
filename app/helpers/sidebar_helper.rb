@@ -24,6 +24,28 @@ module SidebarHelper
         })
       end
 
+      # Add invoicing links if user is subscribed
+      if Current.user&.on_trial_or_subscribed?
+        items << {
+          name: "Invoices",
+          path: invoices_path,
+          icon: "document-text",
+          active: current_page?(invoices_path) || request.path.start_with?("/invoices")
+        }
+        items << {
+          name: "Customers",
+          path: customers_path,
+          icon: "users",
+          active: current_page?(customers_path) || request.path.start_with?("/customers")
+        }
+        items << {
+          name: "Products",
+          path: products_path,
+          icon: "cube",
+          active: current_page?(products_path) || request.path.start_with?("/products")
+        }
+      end
+
       # Add billing link only if user is subscribed
       if Current.user&.subscribed?
         items << {

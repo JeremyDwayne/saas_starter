@@ -100,6 +100,35 @@
                     </li>
                   <% end %>
 
+                  <% if Current.user&.on_trial_or_subscribed? %>
+                    <li>
+                      <%= link_to invoices_path,
+                          class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(invoices_path) || request.path.start_with?('/invoices') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
+                          data: { action: "click->mobile-sidebar#close" } do %>
+                        <%= icon 'document-text', class: 'h-6 w-6 shrink-0' %>
+                        Invoices
+                      <% end %>
+                    </li>
+
+                    <li>
+                      <%= link_to customers_path,
+                          class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(customers_path) || request.path.start_with?('/customers') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
+                          data: { action: "click->mobile-sidebar#close" } do %>
+                        <%= icon 'users', class: 'h-6 w-6 shrink-0' %>
+                        Customers
+                      <% end %>
+                    </li>
+
+                    <li>
+                      <%= link_to products_path,
+                          class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(products_path) || request.path.start_with?('/products') ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",
+                          data: { action: "click->mobile-sidebar#close" } do %>
+                        <%= icon 'cube', class: 'h-6 w-6 shrink-0' %>
+                        Products
+                      <% end %>
+                    </li>
+                  <% end %>
+
                   <li>
                     <%= link_to settings_path,
                         class: "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold #{current_page?(settings_path) ? 'bg-gray-50 text-blue-600' : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'}",

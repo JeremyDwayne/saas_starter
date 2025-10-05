@@ -75,9 +75,7 @@ group :development do
 end
 
 group :test do
-  # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
-  gem "capybara"
-  gem "selenium-webdriver"
+  # Test group - no additional gems needed beyond defaults
 end
 
 gem "madmin", "~> 2.1"

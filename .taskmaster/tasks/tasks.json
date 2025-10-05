@@ -2,149 +2,208 @@
   "master": {
     "tasks": [
       {
-        "id": "1",
-        "title": "Create Platform Fee Configuration Migration and Model",
-        "description": "Create database migration and model for platform fee configurations with subscription tier-based fee structures",
-        "details": "Create CreatePlatformFeeConfigurations migration with fields: subscription_tier (string), fee_percentage (decimal 5,2), minimum_fee_cents (integer), active (boolean). Create PlatformFeeConfiguration model with validations for tier uniqueness, fee percentage bounds (0-100%), and scope methods for active configurations. Include VALID_TIERS constant with personal, professional, enterprise, none values. Implement fee_for_tier class method and calculate_application_fee instance method.",
-        "testStrategy": "Unit tests for model validations, fee calculation logic, tier lookup methods, and edge cases like minimum fee enforcement. Test invalid tier names and percentage bounds.",
+        "id": "11",
+        "title": "Create Core Organization, Membership, and Invitation Models",
+        "description": "Establish the foundational database schema and models for multi-tenancy. This includes creating the Organization, OrganizationMembership, and Invitation models, and updating the User model to support these new relationships as outlined in PRD Phase 1.",
+        "details": "Generate migrations for `organizations`, `organization_memberships`, and `invitations` tables using UUIDs for primary keys. Implement model associations (e.g., `has_many :users, through: :memberships`), validations, and role-based logic using Rails enums for the `role` field. Add `has_secure_token` to the Invitation model for secure token generation. Update the User model with `has_many :organizations, through: :memberships`.",
+        "testStrategy": "Write RSpec model tests for each new model. For Organization, test validations and slug generation. For OrganizationMembership, test the role enum, scopes, and uniqueness constraints. For Invitation, test token generation, expiration logic, and the `accept` method. Update User model tests to verify the new associations.",
         "priority": "high",
         "dependencies": [],
         "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T22:23:29.186Z"
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Generate Organization Model and Migration",
+            "description": "Create the migration for the `organizations` table and the corresponding `Organization` model. This will be the central model for multi-tenancy.",
+            "dependencies": [],
+            "details": "Run `rails g model Organization name:string slug:string:uniq`. In the generated migration file, ensure the primary key is a UUID by setting `id: :uuid`. Add a `NOT NULL` constraint to the `name` column. In the `app/models/organization.rb` file, add `validates :name, presence: true`.",
+            "status": "done",
+            "testStrategy": "Write a model spec for Organization. Test that a new organization is invalid without a name. Verify that saving a valid organization automatically generates a unique slug.",
+            "updatedAt": "2025-10-05T19:35:22.584Z",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Generate OrganizationMembership Model and Migration",
+            "description": "Create the join model and table to connect Users and Organizations, which will also store the member's role.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Run `rails g model OrganizationMembership role:integer`. In the migration, add `t.references :user, null: false, foreign_key: true, type: :uuid` and `t.references :organization, null: false, foreign_key: true, type: :uuid`. Ensure the primary key is `id: :uuid`. Add a unique index on `[:user_id, :organization_id]`. In `app/models/organization_membership.rb`, add `belongs_to :user` and `belongs_to :organization`. Define an enum for the role: `enum role: { admin: 0, member: 1 }, _default: :member`.",
+            "status": "done",
+            "testStrategy": "Write a model spec for OrganizationMembership. Test the uniqueness constraint for a user and organization pair. Verify the `role` enum defaults to 'member' and correctly handles assignment and querying for 'admin' and 'member' roles.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-05T19:42:53.415Z"
+          },
+          {
+            "id": 3,
+            "title": "Update User and Organization Models with Associations",
+            "description": "Wire up the many-to-many relationships between Users and Organizations through the new OrganizationMembership model.",
+            "dependencies": [
+              "11.2"
+            ],
+            "details": "In `app/models/organization.rb`, add `has_many :organization_memberships, dependent: :destroy` and `has_many :users, through: :organization_memberships`. In `app/models/user.rb`, add `has_many :organization_memberships, dependent: :destroy` and `has_many :organizations, through: :organization_memberships`.",
+            "status": "done",
+            "testStrategy": "Update the User model spec. Create a user and two organizations, associate the user with both via memberships, and assert that `user.organizations.count` is 2. Do the same for the Organization model spec, associating two users with one organization.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-05T19:43:49.406Z"
+          },
+          {
+            "id": 4,
+            "title": "Generate Invitation Model and Migration",
+            "description": "Create the model and migration for handling invitations for users to join an organization.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Run `rails g model Invitation email:string:uniq role:integer token:string:uniq:index`. In the migration, ensure `id: :uuid`. Add `t.references :organization, null: false, foreign_key: true, type: :uuid` and `t.references :invited_by, null: false, foreign_key: { to_table: :users }, type: :uuid`. In `app/models/invitation.rb`, add `has_secure_token`, `belongs_to :organization`, and `belongs_to :invited_by, class_name: 'User'`. Add `validates :email, presence: true`. Define the same role enum as in `OrganizationMembership`.",
+            "status": "done",
+            "testStrategy": "Write a model spec for Invitation. Test that a token is automatically generated on creation. Test validations for presence of email and organization. Verify the `invited_by` association works correctly.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-05T19:46:55.919Z"
+          },
+          {
+            "id": 5,
+            "title": "Implement Invitation Acceptance Logic",
+            "description": "Add business logic to the Invitation model to handle the process of a user accepting an invitation and becoming a member of the organization.",
+            "dependencies": [
+              "11.2",
+              "11.4"
+            ],
+            "details": "In `app/models/invitation.rb`, create an instance method `accept!(user)`. This method should create a new `OrganizationMembership` record with the `user`, the invitation's `organization`, and the invitation's `role`. After successfully creating the membership, the invitation record should be destroyed. Add a `to_param` method that returns the `token` for use in URLs.",
+            "status": "done",
+            "testStrategy": "In the Invitation model spec, add a test for the `accept!` method. Create an invitation, a user, and an organization. Call `invitation.accept!(user)` and assert that a new `OrganizationMembership` is created with the correct attributes and that the invitation record is deleted from the database.",
+            "parentId": "undefined",
+            "updatedAt": "2025-10-05T19:47:41.407Z"
+          }
+        ],
+        "updatedAt": "2025-10-05T19:47:41.407Z"
       },
       {
-        "id": "2",
-        "title": "Create Custom Platform Fee Migration and Model",
-        "description": "Create database migration and model for user-specific custom fee overrides with expiration support",
-        "details": "Create CreateCustomPlatformFees migration with fields: user_id (foreign key), fee_percentage (decimal 5,2), minimum_fee_cents (integer), notes (string), expires_at (date). Create CustomPlatformFee model with belongs_to :user association, user_id uniqueness validation, active scope for non-expired fees, and calculate_application_fee method matching PlatformFeeConfiguration interface.",
-        "testStrategy": "Unit tests for user association, expiration logic, fee calculation, and validation constraints. Test active scope with various expiration dates.",
+        "id": "12",
+        "title": "Add `organization_id` Foreign Keys to Business Models",
+        "description": "Create and run migrations to add an `organization_id` foreign key to all business data models that will be owned by an organization. This prepares the schema for data migration as specified in PRD tasks 2.1-2.5.",
+        "details": "Generate separate migrations to add a nullable `organization_id` (type: :uuid) column with a foreign key and index to the following tables: `merchant_customers`, `merchant_products`, `merchant_invoices`, `platform_transactions`, and `custom_platform_fees`. In each corresponding model, update the `belongs_to` association from `:user` to `:organization`.",
+        "testStrategy": "After running migrations, verify the schema changes in `schema.rb`. Update existing model tests to reflect the new `belongs_to :organization` association. Ensure factories are updated to create records with an associated organization, and that tests for model logic still pass.",
         "priority": "high",
         "dependencies": [
-          "1"
+          "11"
         ],
         "status": "done",
         "subtasks": [],
-        "updatedAt": "2025-10-03T22:26:19.907Z"
+        "updatedAt": "2025-10-05T19:51:12.927Z"
       },
       {
-        "id": "3",
-        "title": "Create Platform Transaction Migration and Model",
-        "description": "Create database migration and model to track all platform charges and application fees",
-        "details": "Create CreatePlatformTransactions migration with fields: merchant_id (foreign key to users), stripe_charge_id (unique), charge_amount_cents (integer), application_fee_cents (integer), fee_percentage_applied (decimal 5,2), customer_email, description, metadata (json), status (enum: succeeded/refunded/partially_refunded). Create PlatformTransaction model with belongs_to :merchant association, validations, scopes for status filtering, and convenience methods for dollar amounts and net calculations.",
-        "testStrategy": "Unit tests for merchant association, charge amount validations, status transitions, dollar conversion methods, and metadata handling. Test scope methods and net amount calculations.",
+        "id": "13",
+        "title": "Migrate Pay Gem Models to Organization Ownership",
+        "description": "Update the polymorphic `owner` association for the `pay` gem's Customer and Merchant models from `User` to `Organization`. This is critical for associating subscriptions and Stripe Connect accounts with tenants instead of individual users (PRD tasks 2.6, 2.7).",
+        "details": "Add `pay_customer` and `pay_merchant` method calls to the `Organization` model. Create a data migration to find all `pay_customers` and `pay_merchants` currently owned by a `User` and update their `owner_type` to 'Organization' and `owner_id` to the ID of the user's newly created default organization.",
+        "testStrategy": "Write integration tests for subscription creation and Stripe Connect onboarding flows, ensuring the `Pay::Customer` and `Pay::Merchant` records are correctly associated with an `Organization` instance. Test that existing subscription data can be correctly accessed after the data migration.",
         "priority": "high",
         "dependencies": [
-          "2"
+          "12"
         ],
-        "status": "done",
+        "status": "in-progress",
         "subtasks": [],
-        "updatedAt": "2025-10-03T22:28:18.542Z"
+        "updatedAt": "2025-10-05T19:51:22.601Z"
       },
       {
-        "id": "4",
-        "title": "Enhance User Model with Platform Fee Methods",
-        "description": "Add platform fee calculation methods and merchant payment capabilities to User model",
-        "details": "Add methods to User model: platform_fee_percentage (checks custom fee first, falls back to tier), calculate_platform_fee(amount_cents), current_subscription_tier (extracts from subscription name), merchant_onboarding_complete?, can_accept_payments?. Add associations: has_one :custom_platform_fee, has_many :platform_transactions. The pay_merchant association already exists from line 12 in user.rb.",
-        "testStrategy": "Unit tests for fee calculation precedence (custom vs tier), subscription tier extraction, merchant status checks, and association functionality. Test edge cases like missing subscriptions and incomplete onboarding.",
+        "id": "14",
+        "title": "Backfill Data and Enforce Schema Constraints",
+        "description": "Create and run a data migration script to populate the new `organization_id` columns for all existing data. After successful backfilling, add NOT NULL constraints to enforce the new data model (PRD tasks 2.8, 2.9).",
+        "details": "Create a Rails data migration (`db/data/`). The script should iterate through each `User`, create a default `Organization` (e.g., \"John Doe's Team\"), create an `OrganizationMembership` with the 'owner' role, and then update all of that user's associated records (`merchant_products`, etc.) with the new organization's ID. Create a subsequent schema migration to add `null: false` constraints to all `organization_id` columns and remove the now-redundant `user_id` columns.",
+        "testStrategy": "Test the migration script thoroughly on a staging environment with a production data dump. Write assertions within the migration to verify data integrity post-execution. After the migration, run the full RSpec test suite to ensure no regressions have been introduced.",
         "priority": "high",
         "dependencies": [
-          "3"
+          "13"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T22:29:27.381Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "5",
-        "title": "Create Fee Calculation Service",
-        "description": "Build service object for centralized platform fee calculations with detailed breakdown",
-        "details": "Create FeeCalculationService with class method calculate_for_user(user, amount_cents) returning hash with amount_cents, fee_cents, fee_percentage, net_amount_cents, and fee_source (custom/tier/default). Service should handle all fee calculation logic and provide consistent interface for controllers and other services.",
-        "testStrategy": "Unit tests for fee calculations across different user types (custom fee, tier-based, no subscription), amount scenarios, and return value structure. Test fee source attribution accuracy.",
-        "priority": "medium",
-        "dependencies": [
-          "4"
-        ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T22:30:18.419Z"
-      },
-      {
-        "id": "6",
-        "title": "Create Platform Charge Service",
-        "description": "Build service object for creating Stripe charges with application fees using Direct Charges model",
-        "details": "Create PlatformChargeService with create_charge class method accepting merchant, amount_cents, customer_email, description, metadata parameters. Service validates merchant onboarding and subscription status, calculates fees via FeeCalculationService, creates Stripe charge on connected account with application_fee_amount, and records transaction in PlatformTransaction. Include custom error classes for different failure scenarios.",
-        "testStrategy": "Unit tests for merchant validation, Stripe API integration (mocked), fee calculation integration, transaction recording, and error handling for various failure scenarios. Integration tests with test Stripe accounts.",
+        "id": "15",
+        "title": "Implement Organization Context and Authorization",
+        "description": "Implement the application's request-level context to manage the current organization and create controller concerns for authorization based on a user's role within that organization (PRD Phase 3).",
+        "details": "Add `organization` and `membership` attributes to `app/models/current.rb`. Create an `OrganizationContext` concern with a `before_action` to set `Current.organization` from a session variable (`session[:current_organization_id]`). Create an `OrganizationAuthorization` concern with methods like `require_organization_admin` and `require_organization_owner`. Include these concerns in `ApplicationController`.",
+        "testStrategy": "Write request specs to test the context-setting logic, including redirection when no context is set. Write controller tests for a sample controller to verify that the authorization methods correctly grant or deny access based on the user's role in `Current.organization`.",
         "priority": "high",
         "dependencies": [
-          "5"
+          "14"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T23:07:14.864Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "7",
-        "title": "Create Connected Accounts Controller",
-        "description": "Build controller for Stripe Connect onboarding flow with account management",
-        "details": "Create ConnectedAccountsController with actions: new (show onboarding info), create (initiate Stripe Connect), return (handle onboarding completion), refresh (regenerate onboarding link), dashboard (redirect to Stripe Express Dashboard). Include subscription requirement check and proper error handling with user-friendly messages.",
-        "testStrategy": "Controller tests for each action, subscription requirement enforcement, Stripe Connect flow handling, and redirect behaviors. System tests for complete onboarding workflow.",
+        "id": "16",
+        "title": "Implement UI Organization Switcher and Management",
+        "description": "Create the primary UI components for multi-tenancy: an organization switcher in the navbar and the controllers/views for users to manage their organizations (PRD tasks 4.1, 4.2, 4.3, 4.7).",
+        "details": "Create a `_organization_switcher.html.erb` partial rendered in the navbar, powered by a Stimulus controller. The 'Switch' action should POST to a new `OrganizationsController#switch` action, which updates the session and redirects. Generate the `OrganizationsController` with standard RESTful actions (index, new, create, show) and corresponding views styled with Tailwind CSS.",
+        "testStrategy": "Write a system test where a user belonging to two organizations can see both in the dropdown, switch context, and see the page content update accordingly. Write controller tests for `OrganizationsController` to verify authorization and correct behavior for each action.",
         "priority": "medium",
         "dependencies": [
-          "6"
+          "15"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T23:08:36.923Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "8",
-        "title": "Create Platform Charges Controller",
-        "description": "Build controller for creating and managing platform charges with transaction history",
-        "details": "Create PlatformChargesController with actions: new (charge form with fee preview), create (process charge via PlatformChargeService), index (transaction history with pagination and summary stats), show (individual transaction details). Include merchant onboarding requirement and proper error handling for charge failures.",
-        "testStrategy": "Controller tests for charge creation, fee preview calculations, transaction listing, authorization checks, and error handling. System tests for complete charge workflow and UI interactions.",
+        "id": "17",
+        "title": "Implement Team Member and Invitation Management UI",
+        "description": "Develop the UI for organization admins to invite new members via email, manage the roles of existing members, and remove members from an organization (PRD tasks 4.5, 4.6).",
+        "details": "Create `OrganizationMembersController` and `OrganizationInvitationsController` nested under the `organizations` resource. Implement logic for sending invitation emails using Action Mailer with a tokenized link. Create views for listing members, changing roles via a form, and managing pending/revoking invitations. The invitation acceptance page should handle both new user sign-ups and existing user logins.",
+        "testStrategy": "Write a system test for the full invitation flow: an admin sends an invite, the recipient receives the email, clicks the link, signs up/logs in, and is successfully added to the organization. Test role changes and member removal. Use `assert_enqueued_email_with` to test email delivery.",
         "priority": "medium",
         "dependencies": [
-          "7"
+          "16"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T23:31:01.777Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "9",
-        "title": "Create Views and UI Components",
-        "description": "Build all frontend views for Stripe Connect onboarding, charge creation, and transaction management",
-        "details": "Create views: connected_accounts/new.html.erb (onboarding page with fee display), platform_charges/new.html.erb (charge form with real-time fee calculation), platform_charges/index.html.erb (transaction history with summary cards), settings enhancement for connected account status. Use Tailwind CSS for styling and include Stimulus controllers for dynamic fee calculations.",
-        "testStrategy": "System tests for UI workflows, fee calculation display, form submissions, and responsive design. Test JavaScript interactions for dynamic fee preview and error state handling.",
-        "priority": "medium",
+        "id": "18",
+        "title": "Refactor Controllers and Services for Organization Scope",
+        "description": "Update all existing business logic in controllers and services to operate within the scope of the `Current.organization` instead of `Current.user`. This is a major refactoring to make the application tenant-aware (PRD Phases 5 & 6).",
+        "details": "Systematically refactor controllers like `MerchantProductsController`, `MerchantCustomersController`, and `MerchantInvoicesController`. Replace all instances of `Current.user.products` with `Current.organization.products`, etc. Update services like `InvoiceService` and `ProductSyncService` to accept an organization object. Move subscription and Stripe Connect logic (e.g., `subscribed?`, `can_accept_payments?`) from the `User` model to the `Organization` model.",
+        "testStrategy": "This is a refactoring task, so the existing test suite is critical. Update all relevant controller and service tests to first establish an organization context (e.g., `Current.organization = organization`). Add new tests to explicitly check for data scoping, ensuring a user from Org A cannot access data from Org B through any controller action.",
+        "priority": "high",
         "dependencies": [
-          "8"
+          "15"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-03T23:34:51.998Z"
+        "status": "pending",
+        "subtasks": []
       },
       {
-        "id": "10",
-        "title": "Create Webhook Job and Configuration",
-        "description": "Implement webhook processing for Stripe Connect events and configure routes",
-        "details": "Create ConnectedAccountWebhookJob to handle account.updated, charge.succeeded, and charge.refunded events. Configure Pay gem webhook subscriptions in initializer. Add routes for connected accounts and platform charges. Create Madmin resources for admin management of fee configurations and transactions. Implement seed data for default fee structures.",
-        "testStrategy": "Unit tests for webhook event processing, Pay gem integration, route accessibility, and admin interface functionality. Integration tests with Stripe webhook events and end-to-end workflow testing.",
+        "id": "19",
+        "title": "Implement Organization Settings and Billing Management",
+        "description": "Create a dedicated, multi-tabbed settings page for organizations, allowing admins to manage general settings, billing/subscription, and Stripe Connect onboarding (PRD task 4.4).",
+        "details": "Extend the `OrganizationsController` with `edit` and `update` actions. Create an `app/views/organizations/edit.html.erb` view with a tabbed layout. The 'General' tab will manage name/slug. The 'Billing' tab will link to the Pay gem's billing portal for the organization. The 'Stripe Connect' tab will show onboarding status and link to the Connect onboarding flow, now associated with the organization.",
+        "testStrategy": "Write system tests for an organization admin navigating to the settings page. Test that they can successfully update the organization's name. Test that the billing and Stripe Connect links are correctly generated for the organization context. Verify that non-admin members cannot access this page.",
         "priority": "medium",
         "dependencies": [
-          "9"
+          "13",
+          "16"
         ],
-        "status": "done",
-        "subtasks": [],
-        "updatedAt": "2025-10-04T00:11:55.348Z"
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": "20",
+        "title": "Finalize Routing, Navigation, and Onboarding",
+        "description": "Update all application routing and navigation to be organization-centric. Implement an onboarding flow for a user's first organization to ensure a smooth setup experience (PRD Phase 8).",
+        "details": "In `config/routes.rb`, nest all merchant-facing resources under an organization scope (e.g., `resources :organizations do resources :products end`). Update the `sidebar_helper.rb` and other navigation partials to generate links that include the `Current.organization`. Create an onboarding flow that, after a user's first sign-up, prompts them to create their first organization and sets it as their current context.",
+        "testStrategy": "Write request specs to ensure old, non-nested routes are properly redirected or return a 404, and that new nested routes are correctly protected by organization membership authorization. Write a system test for the new user sign-up and onboarding flow, verifying they are guided to create an organization and land on the dashboard with the correct context set.",
+        "priority": "medium",
+        "dependencies": [
+          "18"
+        ],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-10-04T00:11:55.349Z",
+      "lastModified": "2025-10-05T19:51:22.602Z",
       "taskCount": 10,
-      "completedCount": 10,
+      "completedCount": 2,
       "tags": [
         "master"
       ]

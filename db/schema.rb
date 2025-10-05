@@ -10,17 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_05_194936) do
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"
     t.decimal "fee_percentage", precision: 5, scale: 2, null: false
     t.integer "minimum_fee_cents"
     t.string "notes"
+    t.string "organization_id"
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
     t.index [ "expires_at" ], name: "index_custom_platform_fees_on_expires_at"
+    t.index [ "organization_id" ], name: "index_custom_platform_fees_on_organization_id"
     t.index [ "user_id" ], name: "index_custom_platform_fees_on_user_id", unique: true
+  end
+
+  create_table "invitations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "invited_by_id", null: false
+    t.string "organization_id", null: false
+    t.integer "role", default: 1, null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "email" ], name: "index_invitations_on_email", unique: true
+    t.index [ "invited_by_id" ], name: "index_invitations_on_invited_by_id"
+    t.index [ "organization_id" ], name: "index_invitations_on_organization_id"
+    t.index [ "token" ], name: "index_invitations_on_token", unique: true
   end
 
   create_table "merchant_customers", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
@@ -32,12 +48,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.string "email", null: false
     t.string "name", null: false
     t.text "notes"
+    t.string "organization_id"
     t.string "phone"
     t.string "postal_code"
     t.string "state"
     t.string "stripe_customer_id"
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
+    t.index [ "organization_id" ], name: "index_merchant_customers_on_organization_id"
     t.index [ "stripe_customer_id" ], name: "index_merchant_customers_on_stripe_customer_id"
     t.index [ "user_id", "email" ], name: "index_merchant_customers_on_user_id_and_email"
     t.index [ "user_id" ], name: "index_merchant_customers_on_user_id"
@@ -67,6 +85,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.text "footer_text"
     t.string "invoice_number", null: false
     t.text "notes"
+    t.string "organization_id"
     t.datetime "paid_at"
     t.datetime "sent_at"
     t.string "status", default: "draft"
@@ -78,6 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.string "user_id", null: false
     t.datetime "voided_at"
     t.index [ "customer_id" ], name: "index_merchant_invoices_on_customer_id"
+    t.index [ "organization_id" ], name: "index_merchant_invoices_on_organization_id"
     t.index [ "status" ], name: "index_merchant_invoices_on_status"
     t.index [ "stripe_invoice_id" ], name: "index_merchant_invoices_on_stripe_invoice_id"
     t.index [ "user_id", "invoice_number" ], name: "index_merchant_invoices_on_user_id_and_invoice_number", unique: true
@@ -90,12 +110,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.integer "default_price_cents", null: false
     t.text "description"
     t.string "name", null: false
+    t.string "organization_id"
     t.string "stripe_price_id"
     t.string "stripe_product_id"
     t.string "tax_code"
     t.string "unit_type", default: "item"
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
+    t.index [ "organization_id" ], name: "index_merchant_products_on_organization_id"
     t.index [ "stripe_product_id" ], name: "index_merchant_products_on_stripe_product_id"
     t.index [ "user_id", "active" ], name: "index_merchant_products_on_user_id_and_active"
     t.index [ "user_id" ], name: "index_merchant_products_on_user_id"
@@ -108,6 +130,28 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
     t.index [ "user_id" ], name: "index_omni_auth_identities_on_user_id"
+  end
+
+  create_table "organization_memberships", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "organization_id", null: false
+    t.integer "role", default: 1, null: false
+    t.datetime "updated_at", null: false
+    t.string "user_id", null: false
+    t.index [ "organization_id" ], name: "index_organization_memberships_on_organization_id"
+    t.index [ "user_id", "organization_id" ], name: "index_org_memberships_on_user_and_org", unique: true
+    t.index [ "user_id" ], name: "index_organization_memberships_on_user_id"
+  end
+
+  create_table "organizations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "owner_id"
+    t.json "settings", default: {}
+    t.string "slug"
+    t.datetime "updated_at", null: false
+    t.index [ "owner_id" ], name: "index_organizations_on_owner_id"
+    t.index [ "slug" ], name: "index_organizations_on_slug", unique: true
   end
 
   create_table "pay_charges", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
@@ -240,11 +284,13 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_162627) do
     t.decimal "fee_percentage_applied", precision: 5, scale: 2
     t.string "merchant_id", null: false
     t.json "metadata"
+    t.string "organization_id"
     t.string "status", default: "succeeded"
     t.string "stripe_charge_id", null: false
     t.datetime "updated_at", null: false
     t.index [ "created_at" ], name: "index_platform_transactions_on_created_at"
     t.index [ "merchant_id" ], name: "index_platform_transactions_on_merchant_id"
+    t.index [ "organization_id" ], name: "index_platform_transactions_on_organization_id"
     t.index [ "status" ], name: "index_platform_transactions_on_status"
     t.index [ "stripe_charge_id" ], name: "index_platform_transactions_on_stripe_charge_id", unique: true
   end

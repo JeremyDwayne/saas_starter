@@ -5,6 +5,7 @@
 class MerchantInvoice < ApplicationRecord
   # Associations
   belongs_to :user
+  belongs_to :organization, optional: true
   belongs_to :customer, class_name: "MerchantCustomer", foreign_key: "customer_id"
   has_many :invoice_items, class_name: "MerchantInvoiceItem", foreign_key: "invoice_id", dependent: :destroy
 

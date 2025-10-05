@@ -5,6 +5,7 @@
 class MerchantProduct < ApplicationRecord
   # Associations
   belongs_to :user
+  belongs_to :organization, optional: true
   has_many :invoice_items, class_name: "MerchantInvoiceItem", foreign_key: "product_id", dependent: :nullify
 
   # Validations

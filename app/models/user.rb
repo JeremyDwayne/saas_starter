@@ -12,6 +12,8 @@ class User < ApplicationRecord
   has_many :customers, class_name: "MerchantCustomer", dependent: :destroy
   has_many :products, class_name: "MerchantProduct", dependent: :destroy
   has_many :invoices, class_name: "MerchantInvoice", dependent: :destroy
+  has_many :organization_memberships, dependent: :destroy
+  has_many :organizations, through: :organization_memberships
 
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { user_id: pay_customer.owner_id } } }
   pay_merchant

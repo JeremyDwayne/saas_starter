@@ -228,4 +228,27 @@ class UserTest < ActiveSupport::TestCase
 
     assert_includes user.platform_transactions, transaction
   end
+
+  test "has many organizations through memberships" do
+    user = User.create!(email_address: "test16@example.com", password: "password123")
+    org1 = Organization.create!(name: "First Org", owner: user)
+    org2 = Organization.create!(name: "Second Org", owner: user)
+
+    OrganizationMembership.create!(user: user, organization: org1)
+    OrganizationMembership.create!(user: user, organization: org2)
+
+    assert_equal 2, user.organizations.count
+    assert_includes user.organizations, org1
+    assert_includes user.organizations, org2
+  end
+
+  test "destroys memberships when user is destroyed" do
+    user = User.create!(email_address: "test17@example.com", password: "password123")
+    org = Organization.create!(name: "Test Org", owner: user)
+    OrganizationMembership.create!(user: user, organization: org)
+
+    assert_difference "OrganizationMembership.count", -1 do
+      user.destroy
+    end
+  end
 end

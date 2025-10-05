@@ -2,6 +2,7 @@
 # Allows per-user fee overrides for negotiated rates
 class CustomPlatformFee < ApplicationRecord
   belongs_to :user
+  belongs_to :organization, optional: true
 
   validates :fee_percentage, presence: true,
             numericality: { greater_than: 0, less_than_or_equal_to: 100 }

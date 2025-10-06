@@ -38,7 +38,14 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- Personal Plan -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative <%= 'border-2 border-blue-500' if @current_plan == 'personal' %>">
+          <% if @current_plan == 'personal' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                Current Plan
+              </span>
+            </div>
+          <% end %>
           <div class="text-center">
             <h3 class="text-2xl font-bold text-gray-900 mb-2">Personal</h3>
             <div class="mb-6">
@@ -70,21 +77,39 @@
               </li>
             </ul>
 
-            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "personal", turbo: false } do |form| %>
-              <%= form.hidden_field :plan_id, value: "personal" %>
-              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
-              <%= form.submit "Get Started", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% if @current_plan == 'personal' %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Manage Subscription", portal_session.url, class: "w-full block text-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% elsif @current_plan && ['professional', 'enterprise'].include?(@current_plan) %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Downgrade", portal_session.url, class: "w-full block text-center bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% else %>
+              <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "personal", turbo: false } do |form| %>
+                <%= form.hidden_field :plan_id, value: "personal" %>
+                <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+                <%= form.submit "Get Started", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+              <% end %>
             <% end %>
           </div>
         </div>
 
         <!-- Pro Plan -->
-        <div class="bg-white rounded-2xl shadow-lg border-2 border-blue-500 p-8 relative transform lg:scale-105">
-          <!-- Popular Badge -->
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-<%= @current_plan == 'professional' ? 'green' : 'blue' %>-500 p-8 relative transform lg:scale-105">
+          <!-- Popular/Current Badge -->
           <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-              Most Popular
-            </span>
+            <% if @current_plan == 'professional' %>
+              <span class="bg-green-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                Current Plan
+              </span>
+            <% else %>
+              <span class="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                Most Popular
+              </span>
+            <% end %>
           </div>
 
           <div class="text-center">
@@ -126,17 +151,41 @@
               </li>
             </ul>
 
-            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "professional", turbo: false } do |form| %>
-              <%= form.hidden_field :plan_id, value: "professional" %>
-              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
-              <%= form.submit "Start Free Trial", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% if @current_plan == 'professional' %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Manage Subscription", portal_session.url, class: "w-full block text-center bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% elsif @current_plan == 'personal' %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Upgrade", portal_session.url, class: "w-full block text-center bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% elsif @current_plan == 'enterprise' %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Downgrade", portal_session.url, class: "w-full block text-center bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% else %>
+              <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "professional", turbo: false } do |form| %>
+                <%= form.hidden_field :plan_id, value: "professional" %>
+                <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+                <%= form.submit "Start Free Trial", class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+              <% end %>
+              <p class="text-sm text-gray-500 mt-2">14-day free trial, no credit card required</p>
             <% end %>
-            <p class="text-sm text-gray-500 mt-2">14-day free trial, no credit card required</p>
           </div>
         </div>
 
         <!-- Enterprise Plan -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 relative <%= 'border-2 border-purple-500' if @current_plan == 'enterprise' %>">
+          <% if @current_plan == 'enterprise' %>
+            <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+              <span class="bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                Current Plan
+              </span>
+            </div>
+          <% end %>
           <div class="text-center">
             <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
             <div class="mb-6">
@@ -176,10 +225,22 @@
               </li>
             </ul>
 
-            <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "enterprise", turbo: false } do |form| %>
-              <%= form.hidden_field :plan_id, value: "enterprise" %>
-              <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
-              <%= form.submit "Contact Sales", class: "w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+            <% if @current_plan == 'enterprise' %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Manage Subscription", portal_session.url, class: "w-full block text-center bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% elsif @current_plan && ['personal', 'professional'].include?(@current_plan) %>
+              <% if Current.organization&.payment_processor %>
+                <% portal_session = Current.organization.payment_processor.billing_portal(return_url: pricing_url) %>
+                <%= link_to "Upgrade", portal_session.url, class: "w-full block text-center bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors", target: "_blank" %>
+              <% end %>
+            <% else %>
+              <%= form_with url: subscriptions_path, method: :post, local: false, data: { controller: "pricing-subscription", "pricing-subscription-plan-value": "enterprise", turbo: false } do |form| %>
+                <%= form.hidden_field :plan_id, value: "enterprise" %>
+                <%= form.hidden_field :billing_cycle, value: "month", data: { "pricing-subscription-target": "billingCycle" } %>
+                <%= form.submit "Contact Sales", class: "w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors cursor-pointer" %>
+              <% end %>
             <% end %>
           </div>
         </div>

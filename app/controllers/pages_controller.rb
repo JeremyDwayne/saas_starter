@@ -20,6 +20,13 @@ class PagesController < ApplicationController
   end
 
   def pricing
+    # Get current subscription info if user has an organization
+    @current_plan = nil
+    if Current.organization&.subscribed?
+      subscription = Current.organization.subscription
+      # Extract plan name from subscription (e.g., "professional", "personal", "enterprise")
+      @current_plan = subscription.name&.downcase
+    end
   end
 
   def dashboard

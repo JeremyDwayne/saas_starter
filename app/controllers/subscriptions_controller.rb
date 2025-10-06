@@ -1,11 +1,25 @@
 class SubscriptionsController < ApplicationController
-  before_action :require_organization_context
+  before_action :require_organization_context, only: [ :cancel_subscription ]
   layout "dashboard", only: [ :success ]
 
   def create
     plan_id = params[:plan_id]
     billing_cycle = params[:billing_cycle] || "month"
     trial_days = 14
+
+    # Check if user has an organization, create one if needed
+    unless Current.organization
+      # Create a default organization for the user
+      organization = current_user.organizations.create!(
+        name: "#{current_user.name || current_user.email_address.split('@').first}'s Organization",
+        owner: current_user
+      )
+
+      # Set as current organization
+      session[:current_organization_id] = organization.id
+      Current.organization = organization
+      Current.membership = current_user.organization_memberships.find_by(organization: organization)
+    end
 
     # Define plan configurations with Stripe Price IDs
     # In production, create these prices in your Stripe Dashboard

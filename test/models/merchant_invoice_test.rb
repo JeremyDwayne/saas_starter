@@ -118,14 +118,14 @@ class MerchantInvoiceTest < ActiveSupport::TestCase
   end
 
   test "overdue? returns true when open and past due date" do
-    @invoice.status = "open"
-    @invoice.due_date = Date.yesterday
+    @invoice.update_columns(status: "open", due_date: Date.new(2020, 1, 1))
+    @invoice.reload
     assert @invoice.overdue?
   end
 
   test "overdue? returns false when not past due date" do
-    @invoice.status = "open"
-    @invoice.due_date = Date.tomorrow
+    @invoice.update_columns(status: "open", due_date: Date.new(2030, 12, 31))
+    @invoice.reload
     assert_not @invoice.overdue?
   end
 

@@ -1,4 +1,5 @@
 class OrganizationInvitationsController < ApplicationController
+  layout "dashboard"
   before_action :set_organization, except: [ :accept ]
   before_action :require_organization_admin, except: [ :accept ]
   before_action :set_invitation, only: [ :destroy ]

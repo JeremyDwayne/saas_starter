@@ -3,6 +3,7 @@
 # Merchant Products Controller
 # Handles CRUD operations for merchant product catalog
 class MerchantProductsController < ApplicationController
+  layout "dashboard"
   before_action :require_organization_context
   before_action :require_subscription
   before_action :set_product, only: [ :show, :edit, :update, :destroy, :archive, :unarchive ]

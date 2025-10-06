@@ -1,4 +1,5 @@
 class OrganizationMembersController < ApplicationController
+  layout "dashboard"
   before_action :set_organization
   before_action :require_organization_admin, only: [ :update, :destroy ]
   before_action :set_membership, only: [ :update, :destroy ]

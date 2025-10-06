@@ -3,6 +3,7 @@
 # OrganizationsController
 # Manages organization CRUD operations and organization switching
 class OrganizationsController < ApplicationController
+  layout "dashboard"
   before_action :set_organization, only: [ :show, :edit, :update ]
   before_action :require_admin_access, only: [ :edit, :update ]
 

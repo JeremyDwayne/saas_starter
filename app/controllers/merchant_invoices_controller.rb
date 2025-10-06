@@ -3,6 +3,7 @@
 # Merchant Invoices Controller
 # Handles CRUD operations and actions for merchant invoices
 class MerchantInvoicesController < ApplicationController
+  layout "dashboard"
   before_action :require_organization_context
   before_action :require_subscription
   before_action :require_merchant_onboarded, except: [ :index, :show ]

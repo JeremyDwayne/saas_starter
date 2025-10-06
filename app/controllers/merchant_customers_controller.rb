@@ -3,6 +3,7 @@
 # Merchant Customers Controller
 # Handles CRUD operations for merchant customer management
 class MerchantCustomersController < ApplicationController
+  layout "dashboard"
   before_action :require_organization_context
   before_action :require_subscription
   before_action :set_customer, only: [ :show, :edit, :update, :destroy ]

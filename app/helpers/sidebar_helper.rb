@@ -45,16 +45,6 @@ module SidebarHelper
           active: current_page?(products_path) || request.path.start_with?("/products")
         }
       end
-
-      # Add billing link only if user is subscribed
-      if Current.user&.subscribed?
-        items << {
-          name: "Billing",
-          path: "/pay/subscriptions",
-          icon: "credit-card",
-          active: false # Pay routes don't have easy current_page check
-        }
-      end
     end
   end
 

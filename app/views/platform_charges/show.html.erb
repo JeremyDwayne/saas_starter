@@ -4,9 +4,7 @@
     <div class="mb-8">
       <div class="flex items-center space-x-4 mb-4">
         <%= link_to charges_path, class: "text-gray-400 hover:text-gray-600" do %>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-          </svg>
+          <%= icon 'arrow-left', class: 'h-5 w-5' %>
         <% end %>
         <h1 class="text-3xl font-bold text-gray-900">Transaction Details</h1>
       </div>
@@ -172,9 +170,7 @@
             class="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             View in Stripe Dashboard
-            <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-            </svg>
+            <%= icon 'external-link', class: 'ml-1 h-4 w-4' %>
           </a>
         </div>
       </div>

@@ -17,6 +17,11 @@ class Organization < ApplicationRecord
   pay_customer stripe_attributes: ->(pay_customer) { { metadata: { organization_id: pay_customer.owner_id } } }
   pay_merchant
 
+  # Pay gem requires an email method for Stripe checkout
+  def email
+    owner&.email_address
+  end
+
   # Validations
   validates :name, presence: true
   validates :slug, uniqueness: true, allow_nil: true

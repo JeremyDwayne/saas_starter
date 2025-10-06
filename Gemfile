@@ -53,7 +53,7 @@ gem "omniauth-github", "~> 2.0.0"
 
 # Payments
 gem "pay", "~> 11.2"
-gem "stripe", "~> 15.3"
+gem "stripe", "~> 16.0"
 gem "receipts", "~> 2.4"
 gem "refer"
 

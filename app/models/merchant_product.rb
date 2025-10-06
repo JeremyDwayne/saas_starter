@@ -23,6 +23,7 @@ class MerchantProduct < ApplicationRecord
 
   # Convert price to dollars
   def default_price_dollars
+    return nil if default_price_cents.nil?
     default_price_cents / 100.0
   end
 
@@ -43,6 +44,7 @@ class MerchantProduct < ApplicationRecord
 
   # Formatted price with unit
   def price_with_unit
+    return "Not set" if default_price_cents.nil?
     "$#{sprintf('%.2f', default_price_dollars)} / #{unit_type}"
   end
 

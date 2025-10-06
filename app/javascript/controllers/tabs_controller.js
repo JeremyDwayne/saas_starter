@@ -5,6 +5,18 @@ export default class extends Controller {
   static targets = ["tab", "panel"]
 
   connect() {
+    // Check URL parameters for tab to show
+    const urlParams = new URLSearchParams(window.location.search)
+    const tabParam = urlParams.get('tab')
+
+    if (tabParam) {
+      const tabIndex = this.tabTargets.findIndex(tab => tab.dataset.tabName === tabParam)
+      if (tabIndex !== -1) {
+        this.showTab(tabIndex)
+        return
+      }
+    }
+
     // Show the first tab by default
     this.showTab(0)
   }

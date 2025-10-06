@@ -1,0 +1,18 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  organization: one
+  profile_completed: false
+  organization_details_completed: false
+  platform_configured: false
+  stripe_connect_completed: false
+  current_step: 0
+
+two:
+  organization: two
+  profile_completed: true
+  organization_details_completed: true
+  platform_configured: true
+  stripe_connect_completed: true
+  current_step: 3
+  completed_at: <%= 1.day.ago %>

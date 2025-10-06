@@ -39,6 +39,20 @@ class ConnectedAccountsController < ApplicationController
   def return
     if Current.organization.merchant_onboarding_complete?
       flash[:notice] = "Your account is connected! You can now accept payments."
+
+      # Mark Stripe Connect step as complete in onboarding if it exists
+      if Current.organization.onboarding && !Current.organization.onboarding.stripe_connect_completed?
+        Current.organization.onboarding.complete_step!(:stripe_connect)
+
+        # Redirect to onboarding if not complete, otherwise to settings
+        if Current.organization.onboarding.complete?
+          redirect_to dashboard_path, notice: "🎉 Congratulations! Your organization is all set up!"
+          return
+        else
+          redirect_to onboarding_path(Current.organization.onboarding)
+          return
+        end
+      end
     else
       flash[:warning] = "Onboarding incomplete. Please complete all required steps."
     end

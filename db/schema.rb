@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_05_203154) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_06_223604) do
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"
@@ -130,6 +130,19 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_05_203154) do
     t.datetime "updated_at", null: false
     t.string "user_id", null: false
     t.index [ "user_id" ], name: "index_omni_auth_identities_on_user_id"
+  end
+
+  create_table "onboardings", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.integer "current_step", default: 0, null: false
+    t.boolean "organization_details_completed", default: false, null: false
+    t.string "organization_id", null: false
+    t.boolean "platform_configured", default: false, null: false
+    t.boolean "profile_completed", default: false, null: false
+    t.boolean "stripe_connect_completed", default: false, null: false
+    t.datetime "updated_at", null: false
+    t.index [ "organization_id" ], name: "index_onboardings_on_organization_id", unique: true
   end
 
   create_table "organization_invitations", id: :string, default: -> { "uuid()" }, force: :cascade do |t|

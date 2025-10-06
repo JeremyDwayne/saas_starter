@@ -60,6 +60,14 @@ Rails.application.routes.draw do
     end
   end
 
+  # Onboarding routes
+  resources :onboardings, only: [ :show, :update ] do
+    member do
+      patch :skip_step
+      patch :complete
+    end
+  end
+
   # Connected account onboarding routes
   resource :connected_account, only: [ :new, :create ] do
     collection do

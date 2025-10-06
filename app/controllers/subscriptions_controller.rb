@@ -87,8 +87,13 @@ class SubscriptionsController < ApplicationController
   def success
     # This page is reached after successful Stripe checkout
     # The subscription is automatically created by Pay gem webhooks
-    flash[:notice] = "Welcome aboard! Your subscription is now active."
-    redirect_to dashboard_path
+
+    # Create or find onboarding for this organization
+    onboarding = Current.organization.onboarding || Current.organization.create_onboarding!
+
+    # Redirect to onboarding flow
+    flash[:notice] = "Welcome aboard! Let's get you set up."
+    redirect_to onboarding_path(onboarding)
   end
 
   def cancel

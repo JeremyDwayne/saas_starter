@@ -33,6 +33,9 @@ class PagesController < ApplicationController
   def dashboard
     """Dashboard page for authenticated users"""
     # Authentication is handled by ApplicationController automatically
+
+    # Load onboarding if it exists and is incomplete
+    @onboarding = Current.organization&.onboarding
   end
 
   private

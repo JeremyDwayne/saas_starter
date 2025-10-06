@@ -4,6 +4,7 @@ class Organization < ApplicationRecord
   has_many :organization_memberships, dependent: :destroy
   has_many :users, through: :organization_memberships
   has_many :organization_invitations, dependent: :destroy
+  has_one :onboarding, dependent: :destroy
 
   # Business data associations
   has_many :merchant_customers, dependent: :destroy
@@ -101,6 +102,25 @@ class Organization < ApplicationRecord
       # Default to highest fee if no subscription
       (amount_cents * (default_platform_fee_percentage / 100.0)).round
     end
+  end
+
+  # Onboarding helper methods
+  def has_onboarding?
+    onboarding.present?
+  end
+
+  def onboarding_complete?
+    return false unless has_onboarding?
+    onboarding.complete?
+  end
+
+  def onboarding_progress
+    return 0 unless has_onboarding?
+    onboarding.progress_percentage
+  end
+
+  def needs_onboarding?
+    !onboarding_complete? && on_trial_or_subscribed?
   end
 
   private

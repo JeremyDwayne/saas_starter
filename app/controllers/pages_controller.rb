@@ -1,6 +1,7 @@
 class PagesController < ApplicationController
   allow_unauthenticated_access except: [ :dashboard ]
   layout "dashboard", only: [ :dashboard ]
+  before_action :ensure_organization_context, only: [ :home, :pricing ], if: -> { authenticated? }
 
   def home
     # Demo flash messages for testing toasts
@@ -32,5 +33,17 @@ class PagesController < ApplicationController
   def dashboard
     """Dashboard page for authenticated users"""
     # Authentication is handled by ApplicationController automatically
+  end
+
+  private
+
+  def ensure_organization_context
+    # Force set organization context if not already set
+    if current_user.present? && current_organization.nil? && current_user.organizations.any?
+      first_org = current_user.organizations.first
+      session[:current_organization_id] = first_org.id
+      Current.organization = first_org
+      Current.membership = current_user.organization_memberships.find_by(organization: first_org)
+    end
   end
 end

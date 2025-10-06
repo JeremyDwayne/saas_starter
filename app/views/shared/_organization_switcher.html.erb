@@ -1,4 +1,4 @@
-<% if respond_to?(:current_organization) && current_organization.present? %>
+<% if defined?(current_organization) && current_organization.present? %>
   <div class="relative" data-controller="dropdown">
     <button
       type="button"
@@ -53,6 +53,8 @@
       </div>
     </div>
   </div>
-<% elsif respond_to?(:current_organization) %>
+<% elsif defined?(current_user) && current_user.present? && current_user.organizations.any? %>
+  <%= link_to "Select Organization", organizations_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+<% elsif defined?(current_user) && current_user.present? %>
   <%= link_to "Create Organization", new_organization_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
 <% end %>

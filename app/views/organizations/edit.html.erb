@@ -116,7 +116,8 @@
                     <p class="mt-1 text-sm text-gray-600">No active subscription</p>
                   <% end %>
                 </div>
-                <%= link_to "Manage Billing", @organization.payment_processor.billing_portal_url(return_url: edit_organization_url(@organization)), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", data: { turbo: false } %>
+                <% portal_session = @organization.payment_processor.billing_portal(return_url: edit_organization_url(@organization, tab: 'billing')) %>
+                <%= link_to "Manage Billing", portal_session.url, class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500", target: "_blank" %>
               </div>
             </div>
           <% else %>

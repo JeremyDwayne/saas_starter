@@ -75,18 +75,22 @@ class MerchantInvoice < ApplicationRecord
 
   # Amount helpers
   def subtotal_dollars
+    return nil if subtotal_cents.nil?
     subtotal_cents / 100.0
   end
 
   def tax_dollars
+    return nil if tax_cents.nil?
     tax_cents / 100.0
   end
 
   def total_dollars
+    return nil if total_cents.nil?
     total_cents / 100.0
   end
 
   def application_fee_dollars
+    return nil if application_fee_cents.nil?
     application_fee_cents / 100.0
   end
 

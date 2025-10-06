@@ -30,6 +30,7 @@ class MerchantInvoiceItem < ApplicationRecord
 
   # Amount helpers
   def unit_price_dollars
+    return nil if unit_price_cents.nil?
     unit_price_cents / 100.0
   end
 
@@ -38,6 +39,7 @@ class MerchantInvoiceItem < ApplicationRecord
   end
 
   def amount_dollars
+    return nil if amount_cents.nil?
     amount_cents / 100.0
   end
 

@@ -208,15 +208,16 @@
     <!-- Referral Section -->
     <div class="bg-white shadow rounded-lg mb-6">
       <div class="px-4 py-5 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
-          <div class="mb-4 sm:mb-0">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">Referral Program</h3>
-            <p class="text-sm text-gray-600">Share your referral link with friends and earn <strong><%= ReferralConfiguration.current&.reward_percentage_display || "credits" %></strong> when they subscribe!</p>
+        <% cache ["referral_section", @user.id, @user.available_credit_balance, @user.total_earned_credits, @user.successful_referrals_count, @user.earned_rewards.maximum(:updated_at)] do %>
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6">
+            <div class="mb-4 sm:mb-0">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-2">Referral Program</h3>
+              <p class="text-sm text-gray-600">Share your referral link with friends and earn <strong><%= ReferralConfiguration.current&.reward_percentage_display || "credits" %></strong> when they subscribe!</p>
+            </div>
           </div>
-        </div>
 
-        <!-- Credit Summary -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <!-- Credit Summary -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
             <div class="text-2xl font-bold text-green-600">$<%= sprintf("%.2f", @user.available_credit_balance_dollars) %></div>
             <div class="text-sm text-green-700">Available Credits</div>
@@ -306,6 +307,7 @@
             </div>
           <% end %>
         </div>
+        <% end %>
       </div>
     </div>
 

@@ -65,6 +65,9 @@ class OrganizationTest < ActiveSupport::TestCase
     OrganizationMembership.create!(user: @user, organization: org)
     OrganizationMembership.create!(user: user2, organization: org)
 
+    # Reload the organization to ensure association is fresh
+    org.reload
+
     assert_equal 2, org.users.count
     assert_includes org.users, @user
     assert_includes org.users, user2

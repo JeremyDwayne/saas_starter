@@ -12,6 +12,17 @@ class ReferralReward < ApplicationRecord
   scope :pending, -> { where(status: "pending") }
   scope :expired, -> { where(status: "expired") }
 
+  # Cache invalidation
+  after_commit :clear_referrer_cache
+
+  private
+
+  def clear_referrer_cache
+    referrer.send(:clear_referral_cache) if referrer
+  end
+
+  public
+
   def amount_dollars
     amount / 100.0
   end

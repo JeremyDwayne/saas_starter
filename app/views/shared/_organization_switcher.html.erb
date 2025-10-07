@@ -1,58 +1,60 @@
 <% if defined?(current_organization) && current_organization.present? %>
-  <div class="relative" data-controller="dropdown">
-    <button
-      type="button"
-      data-action="click->dropdown#toggle"
-      class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors"
-    >
-      <%= icon 'building', class: 'w-5 h-5 text-gray-400' %>
-      <span class="hidden lg:block text-sm font-medium text-gray-900 truncate max-w-32">
-        <%= current_organization.name %>
-      </span>
-      <%= icon 'chevron-down', class: 'w-4 h-4 flex-shrink-0' %>
-    </button>
+  <% cache ["organization_switcher", current_user.id, current_user.organization_ids_cached, current_organization.id] do %>
+    <div class="relative" data-controller="dropdown">
+      <button
+        type="button"
+        data-action="click->dropdown#toggle"
+        class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors"
+      >
+        <%= icon 'building', class: 'w-5 h-5 text-gray-400' %>
+        <span class="hidden lg:block text-sm font-medium text-gray-900 truncate max-w-32">
+          <%= current_organization.name %>
+        </span>
+        <%= icon 'chevron-down', class: 'w-4 h-4 flex-shrink-0' %>
+      </button>
 
-    <div
-      data-dropdown-target="menu"
-      class="hidden absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50"
-    >
-      <div class="px-4 py-2 border-b border-gray-100">
-        <p class="text-xs text-gray-500 uppercase tracking-wide">Current Organization</p>
-        <p class="text-sm font-medium text-gray-900 truncate mt-1"><%= current_organization.name %></p>
-      </div>
+      <div
+        data-dropdown-target="menu"
+        class="hidden absolute left-0 mt-2 w-64 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50"
+      >
+        <div class="px-4 py-2 border-b border-gray-100">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Current Organization</p>
+          <p class="text-sm font-medium text-gray-900 truncate mt-1"><%= current_organization.name %></p>
+        </div>
 
-      <div class="py-1">
-        <% current_user.organizations.where.not(id: current_organization.id).each do |organization| %>
-          <%= button_to switch_organization_path(organization), method: :post, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between group" do %>
-            <span class="truncate"><%= organization.name %></span>
-            <span class="text-xs text-gray-400 group-hover:text-gray-600">Switch</span>
+        <div class="py-1">
+          <% current_user.organizations.where.not(id: current_organization.id).each do |organization| %>
+            <%= button_to switch_organization_path(organization), method: :post, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between group" do %>
+              <span class="truncate"><%= organization.name %></span>
+              <span class="text-xs text-gray-400 group-hover:text-gray-600">Switch</span>
+            <% end %>
           <% end %>
-        <% end %>
 
-        <% if current_user.organizations.count <= 1 %>
-          <div class="px-4 py-2 text-sm text-gray-500 italic">
-            No other organizations
-          </div>
-        <% end %>
-      </div>
+          <% if current_user.organizations.count <= 1 %>
+            <div class="px-4 py-2 text-sm text-gray-500 italic">
+              No other organizations
+            </div>
+          <% end %>
+        </div>
 
-      <div class="border-t border-gray-100">
-        <%= link_to organizations_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
-          <div class="flex items-center space-x-2">
-            <%= icon 'settings', class: 'w-4 h-4 text-gray-400' %>
-            <span>Manage Organizations</span>
-          </div>
-        <% end %>
+        <div class="border-t border-gray-100">
+          <%= link_to organizations_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+            <div class="flex items-center space-x-2">
+              <%= icon 'settings', class: 'w-4 h-4 text-gray-400' %>
+              <span>Manage Organizations</span>
+            </div>
+          <% end %>
 
-        <%= link_to new_organization_path, class: "block px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 transition-colors font-medium" do %>
-          <div class="flex items-center space-x-2">
-            <%= icon 'plus', class: 'w-4 h-4' %>
-            <span>Create Organization</span>
-          </div>
-        <% end %>
+          <%= link_to new_organization_path, class: "block px-4 py-2 text-sm text-indigo-600 hover:bg-indigo-50 transition-colors font-medium" do %>
+            <div class="flex items-center space-x-2">
+              <%= icon 'plus', class: 'w-4 h-4' %>
+              <span>Create Organization</span>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
-  </div>
+  <% end %>
 <% elsif defined?(current_user) && current_user.present? && current_user.organizations.any? %>
   <%= link_to "Select Organization", organizations_path, class: "inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
 <% elsif defined?(current_user) && current_user.present? %>

@@ -29,24 +29,31 @@ class Organization < ApplicationRecord
 
   # Callbacks
   before_validation :generate_slug, on: :create
+  after_commit :clear_members_organization_cache, if: :saved_change_to_name?
 
   # Subscription helper methods (delegated from User model for organization-level subscriptions)
   def subscribed?
-    # Check if organization has any active subscription (including trials)
-    return false unless payment_processor
-    payment_processor.subscriptions.active.any?
+    Rails.cache.fetch("organization/#{id}/subscribed", expires_in: 5.minutes) do
+      # Check if organization has any active subscription (including trials)
+      return false unless payment_processor
+      payment_processor.subscriptions.active.any?
+    end
   end
 
   def subscription
-    # Get the most recent active subscription
-    return nil unless payment_processor
-    payment_processor.subscriptions.active.order(created_at: :desc).first
+    Rails.cache.fetch("organization/#{id}/subscription", expires_in: 5.minutes) do
+      # Get the most recent active subscription
+      return nil unless payment_processor
+      payment_processor.subscriptions.active.order(created_at: :desc).first
+    end
   end
 
   def on_trial?
-    # Check if any subscription is on trial
-    return false unless payment_processor
-    payment_processor.subscriptions.on_trial.any?
+    Rails.cache.fetch("organization/#{id}/on_trial", expires_in: 5.minutes) do
+      # Check if any subscription is on trial
+      return false unless payment_processor
+      payment_processor.subscriptions.on_trial.any?
+    end
   end
 
   def on_trial_or_subscribed?
@@ -66,14 +73,16 @@ class Organization < ApplicationRecord
 
   # Platform fee methods (delegated from User model for organization-level fees)
   def platform_fee_percentage
-    # Check for custom fee first
-    custom_fee = custom_platform_fee
-    return custom_fee.fee_percentage if custom_fee&.active?
+    Rails.cache.fetch("organization/#{id}/platform_fee_percentage", expires_in: 1.hour) do
+      # Check for custom fee first
+      custom_fee = custom_platform_fee
+      return custom_fee.fee_percentage if custom_fee&.active?
 
-    # Fall back to tier-based fee
-    tier = current_subscription_tier
-    config = PlatformFeeConfiguration.fee_for_tier(tier)
-    config&.fee_percentage || default_platform_fee_percentage
+      # Fall back to tier-based fee
+      tier = current_subscription_tier
+      config = PlatformFeeConfiguration.fee_for_tier(tier)
+      config&.fee_percentage || default_platform_fee_percentage
+    end
   end
 
   def current_subscription_tier
@@ -124,6 +133,23 @@ class Organization < ApplicationRecord
   end
 
   private
+
+  def clear_platform_fee_cache
+    Rails.cache.delete("organization/#{id}/platform_fee_percentage")
+  end
+
+  def clear_subscription_cache
+    Rails.cache.delete("organization/#{id}/subscribed")
+    Rails.cache.delete("organization/#{id}/subscription")
+    Rails.cache.delete("organization/#{id}/on_trial")
+  end
+
+  def clear_members_organization_cache
+    # Clear organization cache for all members when organization details change
+    users.each do |user|
+      user.send(:clear_organization_cache)
+    end
+  end
 
   def generate_slug
     return if slug.present?

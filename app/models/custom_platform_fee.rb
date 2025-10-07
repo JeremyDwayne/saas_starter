@@ -11,6 +11,17 @@ class CustomPlatformFee < ApplicationRecord
 
   scope :active, -> { where("expires_at IS NULL OR expires_at > ?", Date.current) }
 
+  # Cache invalidation
+  after_commit :clear_organization_platform_fee_cache
+
+  private
+
+  def clear_organization_platform_fee_cache
+    organization.send(:clear_platform_fee_cache) if organization
+  end
+
+  public
+
   # Check if the custom fee is still active
   # @return [Boolean] True if not expired
   def active?

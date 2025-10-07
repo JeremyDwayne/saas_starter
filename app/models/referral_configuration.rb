@@ -6,8 +6,12 @@ class ReferralConfiguration < ApplicationRecord
 
   scope :enabled, -> { where(enabled: true) }
 
+  after_commit :clear_cache
+
   def self.current
-    enabled.first
+    Rails.cache.fetch("referral_config/current", expires_in: 1.day) do
+      enabled.first
+    end
   end
 
   def calculate_reward_amount(subscription_amount_cents)
@@ -49,5 +53,11 @@ class ReferralConfiguration < ApplicationRecord
     else
       "No expiry"
     end
+  end
+
+  private
+
+  def clear_cache
+    Rails.cache.delete("referral_config/current")
   end
 end

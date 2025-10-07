@@ -98,15 +98,22 @@ class User < ApplicationRecord
   end
 
   def has_role?(role_name)
-    roles.exists?(name: role_name.to_s.downcase)
+    normalized_role = role_name.to_s.downcase
+    Rails.cache.fetch("user/#{id}/role/#{normalized_role}", expires_in: 1.hour) do
+      roles.exists?(name: normalized_role)
+    end
   end
 
   def has_permission?(permission_name)
-    roles.joins(:permissions).exists?(permissions: { name: permission_name })
+    Rails.cache.fetch("user/#{id}/permission/#{permission_name}", expires_in: 1.hour) do
+      roles.joins(:permissions).exists?(permissions: { name: permission_name })
+    end
   end
 
   def has_permission_for?(resource, action)
-    roles.joins(:permissions).exists?(permissions: { resource: resource, action: action })
+    Rails.cache.fetch("user/#{id}/permission/#{resource}/#{action}", expires_in: 1.hour) do
+      roles.joins(:permissions).exists?(permissions: { resource: resource, action: action })
+    end
   end
 
   def admin?
@@ -117,7 +124,8 @@ class User < ApplicationRecord
     role = Role.find_by(name: role_name.to_s.downcase)
     return false unless role
 
-    user_roles.find_or_create_by(role: role)
+    result = user_roles.find_or_create_by(role: role)
+    clear_role_permission_cache
     true
   end
 
@@ -126,6 +134,7 @@ class User < ApplicationRecord
     return false unless role
 
     user_roles.where(role: role).destroy_all
+    clear_role_permission_cache
     true
   end
 
@@ -133,9 +142,25 @@ class User < ApplicationRecord
     roles.pluck(:name)
   end
 
+  # Check if user belongs to an organization (cached for performance)
+  def has_organization?(organization_id)
+    Rails.cache.fetch("user/#{id}/organization/#{organization_id}", expires_in: 1.hour) do
+      organizations.exists?(id: organization_id)
+    end
+  end
+
+  # Get cached list of organization IDs
+  def organization_ids_cached
+    Rails.cache.fetch("user/#{id}/organization_ids", expires_in: 1.hour) do
+      organization_ids
+    end
+  end
+
   # Referral reward methods
   def available_credit_balance
-    earned_rewards.available.sum(:amount)
+    Rails.cache.fetch("user/#{id}/credits/available", expires_in: 5.minutes) do
+      earned_rewards.available.sum(:amount)
+    end
   end
 
   def available_credit_balance_dollars
@@ -143,7 +168,9 @@ class User < ApplicationRecord
   end
 
   def total_earned_credits
-    earned_rewards.sum(:amount)
+    Rails.cache.fetch("user/#{id}/credits/earned", expires_in: 5.minutes) do
+      earned_rewards.sum(:amount)
+    end
   end
 
   def total_earned_credits_dollars
@@ -151,7 +178,9 @@ class User < ApplicationRecord
   end
 
   def total_used_credits
-    earned_rewards.used.sum(:amount)
+    Rails.cache.fetch("user/#{id}/credits/used", expires_in: 5.minutes) do
+      earned_rewards.used.sum(:amount)
+    end
   end
 
   def total_used_credits_dollars
@@ -159,7 +188,9 @@ class User < ApplicationRecord
   end
 
   def successful_referrals_count
-    earned_rewards.where.not(status: "pending").count
+    Rails.cache.fetch("user/#{id}/referrals/count", expires_in: 5.minutes) do
+      earned_rewards.where.not(status: "pending").count
+    end
   end
 
   # Platform fee methods
@@ -210,6 +241,26 @@ class User < ApplicationRecord
   end
 
   private
+
+  def clear_role_permission_cache
+    # Clear all role and permission related caches for this user
+    Rails.cache.delete_matched("user/#{id}/role/*")
+    Rails.cache.delete_matched("user/#{id}/permission/*")
+  end
+
+  def clear_organization_cache
+    # Clear organization membership caches for this user
+    Rails.cache.delete_matched("user/#{id}/organization/*")
+    Rails.cache.delete("user/#{id}/organization_ids")
+  end
+
+  def clear_referral_cache
+    # Clear referral credit caches for this user
+    Rails.cache.delete("user/#{id}/credits/available")
+    Rails.cache.delete("user/#{id}/credits/earned")
+    Rails.cache.delete("user/#{id}/credits/used")
+    Rails.cache.delete("user/#{id}/referrals/count")
+  end
 
   def default_platform_fee_percentage
     7.0 # Highest fee for users without subscription

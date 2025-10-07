@@ -81,3 +81,4 @@ group :test do
 end
 
 gem "madmin", "~> 2.1"
+gem "kaminari", "~> 1.2"

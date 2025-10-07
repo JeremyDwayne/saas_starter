@@ -27,6 +27,9 @@ Rails.application.routes.draw do
   get "/pricing", to: "pages#pricing"
   get "/dashboard", to: "pages#dashboard"
 
+  # Announcements routes
+  resources :announcements, only: [ :index, :show ]
+
   # Settings routes
   get "/settings", to: "settings#show", as: :settings
   patch "/settings/profile", to: "settings#update_profile", as: :update_profile_settings

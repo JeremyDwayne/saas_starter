@@ -85,6 +85,7 @@ namespace :madmin do
   namespace :pay do
     resources :merchants
   end
+  resources :announcements
   resources :omni_auth_identities
   resources :sessions
   resources :users

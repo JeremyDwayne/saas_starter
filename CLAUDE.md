@@ -87,7 +87,10 @@ FORCE_MIGRATION=true bin/rails db:migrate
 - **Password reset flow** with time-limited tokens
 
 ### Key Models
-- **User**: Main user model with `has_secure_password`, email validation, Pay gem integration for payments
+- **User**: Main user model with `has_secure_password`, email validation, belongs to multiple organizations
+- **Organization**: Multi-tenant container for subscriptions, Stripe Connect, and business data. Has Pay gem integration (`pay_customer`, `pay_merchant`)
+- **OrganizationMembership**: Join table linking users to organizations with role (admin/member)
+- **Onboarding**: Tracks 4-step onboarding progress per organization (profile, org details, platform config, Stripe Connect)
 - **Session**: Tracks user sessions with IP and user agent
 - **OmniAuthIdentity**: Links users to OAuth providers
 - **Role**: RBAC roles with many-to-many relationship to permissions
@@ -96,19 +99,27 @@ FORCE_MIGRATION=true bin/rails db:migrate
 - **ReferralConfiguration**: System-wide referral reward settings
 
 ### Controllers
-- **ApplicationController**: Includes Authentication concern, requires authentication by default, sets referral cookies
+- **ApplicationController**: Includes Authentication and OrganizationContext concerns, requires authentication by default, sets referral cookies
 - **SessionsController**: Handles login/logout
 - **Sessions::OmniAuthsController**: OAuth callback handling
 - **PasswordsController**: Password reset functionality
-- **SubscriptionsController**: Manages Stripe subscriptions and payment flows
-- **SettingsController**: User profile, password changes, and account deletion
+- **OrganizationsController**: CRUD for organizations, organization switching via session
+- **OrganizationMembersController**: Manage organization members
+- **OrganizationInvitationsController**: Email-based organization invitations
+- **OnboardingsController**: 4-step wizard for new organizations (profile → org details → platform config → Stripe Connect)
+- **SubscriptionsController**: Manages organization-level Stripe subscriptions and payment flows
+- **ConnectedAccountsController**: Handles Stripe Connect onboarding for organizations
+- **SettingsController**: User-specific settings (profile, password, OAuth accounts, referrals, account deletion)
 - **PagesController**: Public and authenticated pages (home, pricing, dashboard)
 
 ### Database Schema
 - Uses SQLite with UUID extension for IDs
 - Core tables: `users`, `sessions`, `omni_auth_identities`
+- Organization tables: `organizations`, `organization_memberships`, `organization_invitations`, `onboardings`
 - RBAC tables: `roles`, `permissions`, `role_permissions`, `user_roles`
 - Payment tables: Pay gem integration for Stripe subscriptions (`pay_customers`, `pay_subscriptions`, `pay_charges`, etc.)
+- Merchant tables: `merchant_customers`, `merchant_products`, `merchant_invoices`, `merchant_invoice_items`, `platform_transactions`
+- Platform fee tables: `platform_fee_configurations`, `custom_platform_fees`
 - Referral tables: `refer_referrals`, `refer_referral_codes`, `refer_visits` (from refer gem)
 - Reward tables: `referral_rewards`, `referral_configurations`
 - Solid Cache/Queue/Cable tables for Rails services
@@ -145,12 +156,23 @@ FORCE_MIGRATION=true bin/rails db:migrate
 - **User methods**: `user.available_credit_balance`, `user.total_earned_credits`, `user.successful_referrals_count`
 - **Configuration**: Managed via `ReferralConfiguration` model with reward percentage, max credits, and expiry settings
 
+### Multi-Tenant Organization System
+- **Organization context**: Stored in session, set via `OrganizationContext` concern
+- **Organization switching**: Users can switch between organizations via `POST /organizations/:id/switch`
+- **Current organization**: Accessed via `Current.organization` and `current_organization` helper
+- **Membership**: Each user-organization link has a role (admin/member) in `organization_memberships`
+- **Invitations**: Email-based invitations with token-based acceptance flow
+- **Onboarding**: 4-step wizard automatically triggered after first subscription payment
+
 ### Payment Processing
-- **Pay gem**: Handles Stripe integration with `pay_customer` and `pay_merchant` on User model
-- **Subscriptions**: Trial periods, active status checks, and automatic billing
+- **Organization-level subscriptions**: Subscriptions managed at organization level via Pay gem
+- **Pay gem**: Organizations have `pay_customer` for subscriptions and `pay_merchant` for Stripe Connect
+- **Stripe Connect**: Organizations connect their own Stripe accounts to accept customer payments
+- **Platform fees**: Configurable per-tier fees (PlatformFeeConfiguration) or custom per-organization fees
+- **Merchant invoicing**: Organizations can create invoices and charge their customers
 - **Receipts**: PDF receipt generation via receipts gem
 - **Webhooks**: Stripe webhooks handled at `/pay/webhooks/stripe`
-- **User methods**: `user.subscribed?`, `user.subscription`, `user.on_trial?`, `user.on_trial_or_subscribed?`
+- **Organization methods**: `organization.subscribed?`, `organization.subscription`, `organization.on_trial?`, `organization.merchant_onboarding_complete?`
 
 ### Admin Interface
 - **Madmin**: Admin dashboard at `/madmin` for managing users, sessions, subscriptions, and rewards
@@ -167,12 +189,18 @@ FORCE_MIGRATION=true bin/rails db:migrate
 
 ## Development Patterns
 
-- **Controllers**: Use `allow_unauthenticated_access` to skip authentication
-- **Service objects**: Business logic in `app/services/` for complex operations
+- **Controllers**: Use `allow_unauthenticated_access` to skip authentication, `require_organization_context` to ensure organization is set
+- **Service objects**: Business logic in `app/services/` for complex operations (e.g., `ReferralRewardService`, `CreditApplicationService`)
 - **Background jobs**: Webhook processing in `app/jobs/` using Solid Queue
-- **Views**: Tailwind CSS for styling, Turbo for interactions
+- **Views**: Tailwind CSS for styling, Turbo for interactions, Lucide icons via `lucide-rails` gem
 - **Testing**: Minitest with fixtures, includes session test helpers
 - **Security**: CSRF protection, secure password handling, content security policy
+- **Caching**: Multi-level caching with Rails.cache (Solid Cache in production, memory_store in development)
+  - Configuration models cached for 1 day
+  - User roles/permissions cached for 1 hour
+  - Organization data cached for 5 minutes to 1 hour
+  - Fragment caching for view partials
+  - Automatic cache invalidation via `after_commit` callbacks
 
 ## Git Hooks
 

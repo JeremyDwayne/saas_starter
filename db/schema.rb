@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_06_223604) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_07_194810) do
+  create_table "announcements", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
+    t.integer "announcement_type", default: 0, null: false
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.datetime "published_at"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index [ "announcement_type" ], name: "index_announcements_on_announcement_type"
+    t.index [ "published_at" ], name: "index_announcements_on_published_at"
+  end
+
   create_table "custom_platform_fees", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "expires_at"

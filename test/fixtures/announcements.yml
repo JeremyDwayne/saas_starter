@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+published_new_feature:
+  title: "New Dashboard Analytics"
+  body: "We've added comprehensive analytics to your dashboard. Track user engagement, revenue, and growth metrics all in one place."
+  announcement_type: 0 # new_feature
+  published_at: <%= 2.days.ago %>
+
+published_update:
+  title: "Updated Billing System"
+  body: "Our billing system has been updated to provide more detailed invoice breakdowns and better payment history tracking."
+  announcement_type: 1 # update
+  published_at: <%= 5.days.ago %>
+
+published_improvement:
+  title: "Faster Page Load Times"
+  body: "We've optimized our caching layer and reduced page load times by 40% across the platform."
+  announcement_type: 2 # improvement
+  published_at: <%= 7.days.ago %>
+
+published_fix:
+  title: "Email Notification Fix"
+  body: "Fixed an issue where some users weren't receiving email notifications for important account updates."
+  announcement_type: 3 # fix
+  published_at: <%= 10.days.ago %>
+
+unpublished:
+  title: "Upcoming Feature"
+  body: "This is a draft announcement that hasn't been published yet."
+  announcement_type: 0 # new_feature
+  published_at: <%= 2.days.from_now %>

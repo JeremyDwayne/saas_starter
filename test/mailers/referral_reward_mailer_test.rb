@@ -21,7 +21,8 @@ class ReferralRewardMailerTest < ActionMailer::TestCase
     assert_equal [ @referrer.email ], mail.to
     assert_match @referrer.name || @referrer.email.split("@").first, mail.body.encoded
     assert_match "$10.00", mail.body.encoded
-    assert_match @referee.email, mail.body.encoded
+    # Template shows name if available, otherwise email
+    assert_match(@referee.name || @referee.email, mail.body.encoded)
     assert_match "Available for use", mail.body.encoded
   end
 

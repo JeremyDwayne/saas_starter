@@ -18,6 +18,7 @@ class OrganizationInvitationMailerTest < ActionMailer::TestCase
     assert_equal "You've been invited to join Test Organization", mail.subject
     assert_equal [ "invitee@example.com" ], mail.to
     assert_match "Test Organization", mail.body.encoded
-    assert_match @user.email_address, mail.body.encoded
+    # Template shows name if available, otherwise email
+    assert_match(@user.name || @user.email_address, mail.body.encoded)
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_10_07_194810) do
+ActiveRecord::Schema[8.1].define(version: 2025_10_07_204603) do
   create_table "announcements", id: :string, default: -> { "uuid()" }, force: :cascade do |t|
     t.integer "announcement_type", default: 0, null: false
     t.text "body", null: false
@@ -423,11 +423,14 @@ ActiveRecord::Schema[8.1].define(version: 2025_10_07_194810) do
 
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "impersonated_role"
+    t.string "impersonator_id"
     t.string "ip_address"
     t.string "source"
     t.datetime "updated_at", null: false
     t.string "user_agent"
     t.string "user_id", null: false
+    t.index [ "impersonator_id" ], name: "index_sessions_on_impersonator_id"
     t.index [ "user_id" ], name: "index_sessions_on_user_id"
   end
 

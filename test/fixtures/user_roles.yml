@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+admin_user_role:
+  user: admin
+  role: admin
+
+another_admin_user_role:
+  user: another_admin
+  role: admin

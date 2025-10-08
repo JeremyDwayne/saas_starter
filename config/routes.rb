@@ -36,6 +36,11 @@ Rails.application.routes.draw do
   patch "/settings/password", to: "settings#update_password", as: :update_password_settings
   delete "/settings/account", to: "settings#destroy_account", as: :destroy_account_settings
 
+  # Impersonation routes (admin only)
+  post "/impersonate/user/:id", to: "impersonations#create_user", as: :impersonate_user
+  post "/impersonate/role/:role_name", to: "impersonations#create_role", as: :impersonate_role
+  delete "/impersonate", to: "impersonations#destroy", as: :stop_impersonation
+
   # Organization routes
   resources :organizations, only: [ :index, :new, :create, :show, :edit, :update ] do
     member do

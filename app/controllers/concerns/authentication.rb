@@ -3,7 +3,7 @@ module Authentication
 
   included do
     before_action :require_authentication
-    helper_method :authenticated?
+    helper_method :authenticated?, :impersonating?, :real_user, :display_user
   end
 
   class_methods do
@@ -48,5 +48,24 @@ module Authentication
     def terminate_session
       Current.session.destroy
       cookies.delete(:session_id)
+    end
+
+    # Check if currently impersonating a user or role
+    # @return [Boolean]
+    def impersonating?
+      Current.impersonating?
+    end
+
+    # Get the real admin user (when impersonating a user)
+    # @return [User, nil]
+    def real_user
+      return Current.impersonator if Current.session&.impersonating_user?
+      Current.user
+    end
+
+    # Get the displayed user (impersonated user or current user)
+    # @return [User]
+    def display_user
+      Current.user
     end
 end

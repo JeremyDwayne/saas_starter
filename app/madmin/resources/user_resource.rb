@@ -23,9 +23,16 @@ class UserResource < Madmin::Resource
   # scope :published
 
   # Add actions to the resource's show page
-  # member_action do |record|
-  #   link_to "Do Something", some_path
-  # end
+  member_action do |record|
+    # Only show impersonation link if not impersonating self
+    unless record.id == Current.user&.id || record.admin?
+      button_to "Impersonate User",
+                impersonate_user_path(record),
+                method: :post,
+                class: "btn btn-secondary",
+                form: { data: { turbo: false } }
+    end
+  end
 
   # Customize the display name of records in the admin area.
   # def self.display_name(record) = record.name

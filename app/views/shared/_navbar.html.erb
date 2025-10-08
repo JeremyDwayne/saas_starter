@@ -96,6 +96,17 @@
                   <p class="text-sm font-medium text-gray-900 truncate"><%= Current.user.email_address %></p>
                 <% end %>
               </div>
+              <% if impersonating? %>
+                <%= button_to stop_impersonation_path,
+                  method: :delete,
+                  class: "w-full text-left px-4 py-2 text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors border-0",
+                  form: { data: { turbo: false } } do %>
+                  <span class="flex items-center">
+                    <%= icon 'arrow-left', class: 'w-4 h-4 mr-2' %>
+                    Stop Impersonating
+                  </span>
+                <% end %>
+              <% end %>
               <%= link_to "Settings",
               settings_path,
               class:
@@ -226,6 +237,15 @@
               <p class="text-sm font-medium text-gray-900"><%= Current.user.email_address %></p>
             <% end %>
           </div>
+          <% if impersonating? %>
+            <%= button_to stop_impersonation_path,
+              method: :delete,
+              class: "w-full text-left px-3 py-2 text-base font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-md transition-colors border-0 flex items-center",
+              form: { data: { turbo: false } } do %>
+              <%= icon 'arrow-left', class: 'w-5 h-5 mr-2' %>
+              Stop Impersonating
+            <% end %>
+          <% end %>
           <%= link_to "Settings",
           settings_path,
           class:

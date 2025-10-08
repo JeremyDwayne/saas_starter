@@ -7,3 +7,7 @@ test_role_one:
 test_role_two:
   name: test_role_2
   description: Test role two
+
+admin:
+  name: admin
+  description: Administrator role
